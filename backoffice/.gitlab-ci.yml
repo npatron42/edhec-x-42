@@ -1,0 +1,37 @@
+variables:
+  INDIGEN_IMAGE_NAME: $INDIGEN_REGISTRY/probtp/directus:$CI_COMMIT_REF_NAME
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script:
+    - docker login -u ${INDIGEN_REGISTRY_LOGIN} -p ${INDIGEN_REGISTRY_PASSWORD} ${INDIGEN_REGISTRY}
+    - docker build --pull --build-arg VERSION=${CI_COMMIT_REF_NAME} -t ${INDIGEN_IMAGE_NAME} .
+    - docker push ${INDIGEN_IMAGE_NAME}
+  only:
+    - tags
+
+include:
+  - component: gitlab.indigen.com/indigen/ci-cd-catalog/terraform-deployment/terraform-deployment@1.1
+    inputs:
+      environment: uat
+      deployment_project_path: 'probtp/hosting-ovh'
+      deployment_file_base_dir: uat
+      docker_image_name: $INDIGEN_IMAGE_NAME
+      deployment_rules:
+        - if: $CI_COMMIT_TAG =~ /alpha/ || $CI_COMMIT_TAG =~ /beta/
+      depends_on_jobs:
+        - build
+  - component: gitlab.indigen.com/indigen/ci-cd-catalog/terraform-deployment/terraform-deployment@1.1
+    inputs:
+      environment: preprod
+      deployment_project_path: 'probtp/hosting-ovh'
+      deployment_file_base_dir: preprod
+      docker_image_name: $INDIGEN_IMAGE_NAME
+      deployment_rules:
+        - if: $CI_COMMIT_TAG && $CI_COMMIT_TAG !~ /alpha/ && $CI_COMMIT_TAG !~ /beta/
+      depends_on_jobs:
+        - build

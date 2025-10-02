@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [        
+        
+        {
+            "command": "cd extensions/probtp && yarn dev",
+            "name": "Extensions probtp",
+            "request": "launch",
+            "type": "node-terminal"
+        }
+    ]
+}

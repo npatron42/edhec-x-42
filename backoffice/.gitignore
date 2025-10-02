@@ -1,0 +1,9 @@
+node_modules
+uploads
+.env
+dist
+.DS_Store
+*.sql.*
+Procfile
+__pycache__
+extensions/indigen-role-layout-assign
