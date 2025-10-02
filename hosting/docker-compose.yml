@@ -1,0 +1,15 @@
+services:
+  dove-db:
+    image: postgres:16
+    container_name: dove-db
+    environment:
+      POSTGRES_DB: dove
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pgsql24.
+    ports:
+      - "5556:5432"
+    volumes:
+      - dove-db-data:/var/lib/postgresql/data
+
+volumes:
+  dove-db-data:
