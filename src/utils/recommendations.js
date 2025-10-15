@@ -105,52 +105,52 @@ export const getMatchMessage = (matchScore) => {
     return {
       title: '🎉 Match Parfait !',
       message: 'Ce produit est idéal pour vos besoins',
-      color: '#4CAF50',
+      color: '#1C355B',
     };
   } else if (matchScore >= 60) {
     return {
       title: '✨ Excellent Match',
       message: 'Ce produit correspond bien à votre profil',
-      color: '#2196F3',
+      color: '#3C5272',
     };
   } else if (matchScore >= 40) {
     return {
       title: '👍 Bon Match',
       message: 'Ce produit pourrait vous convenir',
-      color: '#FF9800',
+      color: '#5D6F8A',
     };
   } else {
     return {
       title: '🤔 À Essayer',
       message: 'Découvrez ce produit',
-      color: '#9E9E9E',
+      color: '#7D8CA1',
     };
   }
 };
 
 // Formater les statistiques pour l'affichage
 export const formatImpactStats = (stats) => {
-  return {
-    co2: {
-      value: stats.co2Saved.toFixed(2),
-      unit: 'kg',
-      label: 'CO₂ évité',
-      icon: '🌱',
-      equivalence: `${(stats.co2Saved * 4).toFixed(0)} km en voiture`,
-    },
-    plastic: {
-      value: (stats.plasticSaved / 1000).toFixed(2),
-      unit: 'kg',
-      label: 'Plastique économisé',
-      icon: '♻️',
-      equivalence: `${stats.bottlesSaved} bouteilles`,
-    },
-    refills: {
-      value: stats.totalRefills,
-      unit: '',
-      label: 'Recharges effectuées',
-      icon: '🔄',
-      equivalence: '',
-    },
-  };
+    return {
+        co2: {
+            value: stats.co2Saved.toFixed(2),
+            unit: 'kg',
+            label: 'CO₂ évité',
+            icon: { provider: 'Feather', name: 'wind' },
+            equivalence: `${(stats.co2Saved * 4).toFixed(0)} km en voiture`,
+        },
+        plastic: {
+            value: (stats.plasticSaved / 1000).toFixed(2),
+            unit: 'kg',
+            label: 'Plastique économisé',
+            icon: { provider: 'MaterialCommunityIcons', name: 'recycle' },
+            equivalence: `${stats.bottlesSaved} bouteilles`,
+        },
+        refills: {
+            value: stats.totalRefills,
+            unit: '',
+            label: 'Recharges effectuées',
+            icon: { provider: 'MaterialCommunityIcons', name: 'refresh' },
+            equivalence: '',
+        },
+    };
 };

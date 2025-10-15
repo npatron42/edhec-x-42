@@ -1,129 +1,231 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator, Alert } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ActivityIndicator,
+    Platform,
+} from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { AppButton, AppHeader, AppIcon } from '../components/common';
+import { colors, spacing, radius, shadow } from '../styles/theme';
 
-// Points simulés des bornes de recharge (latitude/longitude fictives autour de Paris)
 const MOCK_STATIONS = [
-  { id: 'S1', name: 'Borne Eco-Refill - Centre Ville', coords: { latitude: 48.8566, longitude: 2.3522 }, emoji: '🏙️' },
-  { id: 'S2', name: 'Borne Eco-Refill - Gare', coords: { latitude: 48.8582, longitude: 2.2945 }, emoji: '🚉' },
-  { id: 'S3', name: 'Borne Eco-Refill - Centre Commercial', coords: { latitude: 48.8606, longitude: 2.3376 }, emoji: '🛍️' },
-  { id: 'S4', name: "Borne Eco-Refill - Université", coords: { latitude: 48.8422, longitude: 2.3449 }, emoji: '🎓' },
+    {
+        id: 'S1',
+        name: 'Borne Eco-Refill - Centre Ville',
+        coords: { latitude: 48.8566, longitude: 2.3522 },
+    },
+    {
+        id: 'S2',
+        name: 'Borne Eco-Refill - Gare',
+        coords: { latitude: 48.8582, longitude: 2.2945 },
+    },
+    {
+        id: 'S3',
+        name: 'Borne Eco-Refill - Centre Commercial',
+        coords: { latitude: 48.8606, longitude: 2.3376 },
+    },
+    {
+        id: 'S4',
+        name: 'Borne Eco-Refill - Université',
+        coords: { latitude: 48.8422, longitude: 2.3449 },
+    },
 ];
 
+const FALLBACK_REGION = {
+    latitude: 48.8566,
+    longitude: 2.3522,
+    latitudeDelta: 0.08,
+    longitudeDelta: 0.08,
+};
+
 export default function RefillMapScreen({ route, navigation }) {
-  const selectedProducts = route?.params?.selectedProducts || [];
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [region, setRegion] = useState(null);
+    const selectedProducts = route?.params?.selectedProducts || [];
+    const [location, setLocation] = useState(null);
+    const [region, setRegion] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          setErrorMsg("Permission de localisation refusée");
-          // Fallback sur Paris
-          const fallback = { latitude: 48.8566, longitude: 2.3522 };
-          setLocation(fallback);
-          setRegion({ ...fallback, latitudeDelta: 0.08, longitudeDelta: 0.08 });
-          return;
-        }
+    useEffect(() => {
+        (async () => {
+            try {
+                const { status } =
+                    await Location.requestForegroundPermissionsAsync();
+                if (status !== Location.PermissionStatus.GRANTED) {
+                    setError('Permission de localisation refusée');
+                    setRegion(FALLBACK_REGION);
+                    setLoading(false);
+                    return;
+                }
+                const loc = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.Balanced,
+                });
+                const coords = {
+                    latitude: loc.coords.latitude,
+                    longitude: loc.coords.longitude,
+                };
+                setLocation(coords);
+                setRegion({
+                    ...coords,
+                    latitudeDelta: 0.08,
+                    longitudeDelta: 0.08,
+                });
+            } catch (err) {
+                setError('Erreur de localisation');
+                setRegion(FALLBACK_REGION);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
 
-        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-        const coords = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
-        setLocation(coords);
-        setRegion({ ...coords, latitudeDelta: 0.08, longitudeDelta: 0.08 });
-      } catch (e) {
-        setErrorMsg('Erreur localisation');
-        const fallback = { latitude: 48.8566, longitude: 2.3522 };
-        setLocation(fallback);
-        setRegion({ ...fallback, latitudeDelta: 0.08, longitudeDelta: 0.08 });
-      }
-    })();
-  }, []);
+    const openQRCode = () =>
+        navigation.navigate('QRCode', { selectedProducts });
 
-  const openQRCode = () => navigation.navigate('QRCode', { selectedProducts });
+    return (
+        <View style={styles.container}>
+            <AppHeader
+                title="Bornes de Recharge"
+                subtitle="Localisez une borne à proximité"
+                onBack={() => navigation.goBack()}
+            />
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Bornes de Recharge à Proximité</Text>
-        <View style={{ width: 40 }} />
-      </View>
+            <View style={styles.mapWrapper}>
+                {loading ? (
+                    <View style={styles.loader}>
+                        <ActivityIndicator color={colors.primary} />
+                        <Text style={styles.loaderText}>Localisation en cours…</Text>
+                    </View>
+                ) : (
+                    <MapView
+                        style={styles.map}
+                        provider={PROVIDER_GOOGLE}
+                        initialRegion={region || FALLBACK_REGION}
+                        onRegionChangeComplete={setRegion}
+                        showsUserLocation={!!location}
+                        followsUserLocation={false}
+                        showsMyLocationButton
+                    >
+                        {MOCK_STATIONS.map((station) => (
+                            <Marker
+                                key={station.id}
+                                coordinate={station.coords}
+                                title={station.name}
+                                description="Borne de recharge Eco-Refill"
+                            >
+                                <AppIcon
+                                    name="map-marker"
+                                    provider="MaterialCommunityIcons"
+                                    size={32}
+                                    color={colors.primary}
+                                />
+                                <Callout onPress={openQRCode}>
+                                    <View style={styles.callout}>
+                                        <Text style={styles.calloutTitle}>
+                                            {station.name}
+                                        </Text>
+                                        <Text style={styles.calloutDescription}>
+                                            Appuyez pour générer votre QR Code
+                                        </Text>
+                                        <Text style={styles.calloutSubtitle}>
+                                            Produits sélectionnés :{' '}
+                                            {selectedProducts.length}
+                                        </Text>
+                                    </View>
+                                </Callout>
+                            </Marker>
+                        ))}
+                    </MapView>
+                )}
+            </View>
 
-      {/* Carte */}
-      <View style={styles.mapWrapper}>
-        {!region ? (
-          <View style={styles.loader}>
-            <ActivityIndicator color="#2e7d32" />
-            <Text style={{ color: '#666', marginTop: 8 }}>Localisation en cours…</Text>
-          </View>
-        ) : (
-          <MapView
-            style={styles.map}
-            provider={PROVIDER_GOOGLE}
-            initialRegion={region}
-            onRegionChangeComplete={setRegion}
-            showsUserLocation={!!location}
-            followsUserLocation={false}
-            showsMyLocationButton
-          >
-            {MOCK_STATIONS.map((s) => (
-              <Marker key={s.id} coordinate={s.coords} title={s.name} description="Borne de recharge Eco-Refill">
-                <Text style={{ fontSize: 24 }}>{s.emoji}</Text>
-                <Callout onPress={openQRCode}>
-                  <View style={{ maxWidth: 220 }}>
-                    <Text style={{ fontWeight: '700' }}>{s.name}</Text>
-                    <Text style={{ color: '#666', marginTop: 4 }}>Appuyez pour générer votre QR Code</Text>
-                    <Text style={{ color: '#2e7d32', marginTop: 6 }}>Produits sélectionnés: {selectedProducts.length}</Text>
-                  </View>
-                </Callout>
-              </Marker>
-            ))}
-          </MapView>
-        )}
-      </View>
+            {Platform.OS === 'web' ? (
+                <View style={styles.webHelp}>
+                    <Text style={styles.webHelpText}>
+                        Si la carte ne s'affiche pas, vérifiez les permissions de
+                        localisation du navigateur.
+                    </Text>
+                </View>
+            ) : null}
 
-      {/* Aide web / permissions */}
-      {Platform.OS === 'web' && (
-        <View style={styles.webHelp}>
-          <Text style={styles.webHelpText}>Si la carte ne s'affiche pas, vérifiez les permissions de localisation du navigateur.</Text>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+            <View style={styles.footer}>
+                <AppButton
+                    label="Générer mon QR Code"
+                    icon={{ name: 'qr-code', provider: 'Ionicons' }}
+                    onPress={openQRCode}
+                />
+            </View>
         </View>
-      )}
-
-      <TouchableOpacity style={styles.qrBtn} onPress={openQRCode}>
-        <Text style={styles.qrBtnText}>Générer mon QR Code</Text>
-        <Text style={styles.qrBtnIcon}>→</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20, backgroundColor: '#fff',
-  },
-  backButton: { padding: 10 },
-  backButtonText: { fontSize: 28, color: '#2e7d32' },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1a1a1a' },
-
-  mapWrapper: { flex: 1, marginHorizontal: 20, marginBottom: 10, borderRadius: 16, overflow: 'hidden' },
-  map: { flex: 1 },
-  loader: { height: 260, alignItems: 'center', justifyContent: 'center', backgroundColor: '#e8f5e9', borderRadius: 16 },
-
-  webHelp: { marginHorizontal: 20, marginTop: 10, backgroundColor: '#f8f9fa', padding: 12, borderRadius: 10 },
-  webHelpText: { color: '#666', fontSize: 12, textAlign: 'center' },
-
-  qrBtn: {
-    backgroundColor: '#2e7d32', margin: 20, paddingVertical: 16, borderRadius: 12,
-    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-  },
-  qrBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16, marginRight: 8 },
-  qrBtnIcon: { color: '#fff', fontSize: 20 },
+    container: {
+        flex: 1,
+        backgroundColor: colors.surface,
+    },
+    mapWrapper: {
+        flex: 1,
+        marginHorizontal: spacing.xl,
+        marginTop: spacing.md,
+        marginBottom: spacing.md,
+        borderRadius: radius.xl,
+        overflow: 'hidden',
+        backgroundColor: colors.background,
+        ...shadow.soft,
+    },
+    map: {
+        flex: 1,
+    },
+    loader: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: spacing.xl,
+    },
+    loaderText: {
+        marginTop: spacing.sm,
+        color: colors.textMuted,
+    },
+    callout: {
+        maxWidth: 220,
+    },
+    calloutTitle: {
+        fontWeight: '700',
+        color: colors.textPrimary,
+    },
+    calloutDescription: {
+        color: colors.textMuted,
+        marginTop: spacing.xs,
+    },
+    calloutSubtitle: {
+        color: colors.primary,
+        marginTop: spacing.sm,
+        fontWeight: '600',
+    },
+    webHelp: {
+        marginHorizontal: spacing.xl,
+        padding: spacing.md,
+        borderRadius: radius.md,
+        backgroundColor: colors.surface,
+        marginBottom: spacing.sm,
+    },
+    webHelpText: {
+        color: colors.textMuted,
+        fontSize: 12,
+        textAlign: 'center',
+    },
+    errorText: {
+        textAlign: 'center',
+        color: colors.danger,
+        marginBottom: spacing.sm,
+    },
+    footer: {
+        paddingHorizontal: spacing.xl,
+        paddingBottom: spacing.xxl,
+    },
 });

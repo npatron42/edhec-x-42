@@ -1,188 +1,227 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Share,
-  Platform,
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    Share,
+    Platform,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import { AppButton, AppHeader, AppIcon } from '../components/common';
 import { generateQRData, calculateImpact } from '../utils/recommendations';
 import { addRefillToHistory } from '../utils/storage';
+import { colors, spacing, radius, shadow } from '../styles/theme';
 
 export default function QRCodeScreen({ route, navigation }) {
-  const { answers = {}, selectedProducts = [] } = route.params || {};
-  const [qrData, setQrData] = useState('');
-  const [impact, setImpact] = useState(null);
+    const { answers = {}, selectedProducts = [] } = route.params || {};
+    const [qrData, setQrData] = useState('');
+    const [impact, setImpact] = useState(null);
 
-  useEffect(() => {
-    const data = generateQRData(answers, selectedProducts);
-    setQrData(data);
-    setImpact(calculateImpact(selectedProducts, answers.step5 || 'monthly'));
-  }, [answers, selectedProducts]);
+    useEffect(() => {
+        const data = generateQRData(answers, selectedProducts);
+        setQrData(data);
+        setImpact(calculateImpact(selectedProducts, answers.step5 || 'monthly'));
+    }, [answers, selectedProducts]);
 
-  const handleShare = async () => {
-    try {
-      await Share.share({ message: qrData });
-    } catch (e) {}
-  };
+    const handleShare = async () => {
+        if (!qrData) {
+            return;
+        }
+        try {
+            await Share.share({ message: qrData });
+        } catch (error) {
+            // no-op: native share errors are silently ignored
+        }
+    };
 
-  return (
-    <ScrollView 
-      style={styles.container} 
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator
-      scrollEnabled
-      nestedScrollEnabled
-    >
-      <View style={styles.header}>
-        <Text style={styles.title}>Votre QR Code</Text>
-        <Text style={styles.subtitle}>À présenter à la borne pour recharger vos produits</Text>
-      </View>
+    const handleSimulateRefill = async () => {
+        await addRefillToHistory({ products: selectedProducts });
+        navigation.navigate('Dashboard');
+    };
 
-      <View style={styles.qrWrapper}>
-        {qrData ? (
-          <QRCode value={qrData} size={220} />
-        ) : (
-          <Text>Génération du QR Code…</Text>
-        )}
-      </View>
-      <Text style={styles.qrInfo}>Contient vos préférences et les produits sélectionnés</Text>
+    return (
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator
+        >
+            <AppHeader
+                title="Votre QR Code"
+                subtitle="À présenter à la borne pour recharger vos produits"
+                onBack={() => navigation.goBack()}
+            />
 
-      <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-        <Text style={styles.shareText}>Partager</Text>
-      </TouchableOpacity>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Produits choisis</Text>
-        {selectedProducts.length === 0 ? (
-          <Text style={styles.sectionText}>Aucun produit sélectionné</Text>
-        ) : (
-          selectedProducts.map((p) => (
-            <View key={p.id} style={styles.productRow}>
-              <Text style={styles.productEmoji}>{p.image}</Text>
-              <Text style={styles.productName}>{p.name}</Text>
+            <View style={styles.qrCard}>
+                <View style={styles.qrWrapper}>
+                    {qrData ? (
+                        <QRCode value={qrData} size={220} />
+                    ) : (
+                        <View style={styles.qrPlaceholder}>
+                            <AppIcon
+                                name="loader"
+                                provider="Feather"
+                                size={32}
+                                color={colors.primary}
+                            />
+                            <Text style={styles.qrPlaceholderText}>
+                                Génération du QR Code…
+                            </Text>
+                        </View>
+                    )}
+                </View>
+                <Text style={styles.qrInfo}>
+                    Contient vos préférences et les produits sélectionnés
+                </Text>
+                <AppButton
+                    label="Partager"
+                    icon={{ name: 'share-social-outline', provider: 'Ionicons' }}
+                    variant="outline"
+                    onPress={handleShare}
+                />
             </View>
-          ))
-        )}
-      </View>
 
-      {impact && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Impact estimé</Text>
-          <Text style={styles.sectionText}>Plastique économisé/mois: {impact.plasticSavedPerMonth.toFixed(0)} g</Text>
-          <Text style={styles.sectionText}>CO₂ évité/mois: {impact.co2SavedPerMonth.toFixed(2)} kg</Text>
-        </View>
-      )}
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Produits choisis</Text>
+                {selectedProducts.length === 0 ? (
+                    <Text style={styles.sectionText}>Aucun produit sélectionné</Text>
+                ) : (
+                    selectedProducts.map((product) => (
+                        <View key={product.id} style={styles.productRow}>
+                            <Text style={styles.productEmoji}>{product.image}</Text>
+                            <Text style={styles.productName}>{product.name}</Text>
+                        </View>
+                    ))
+                )}
+            </View>
 
-      {/* Simuler une recharge pour débloquer récompenses */}
-      <TouchableOpacity
-        style={[styles.shareButton, { backgroundColor: '#1e88e5' }]}
-        onPress={async () => {
-          await addRefillToHistory({ products: selectedProducts });
-          navigation.navigate('Dashboard');
-        }}
-      >
-        <Text style={styles.shareText}>J'ai rechargé (simuler)</Text>
-      </TouchableOpacity>
+            {impact ? (
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Impact estimé</Text>
+                    <View style={styles.impactRow}>
+                        <AppIcon
+                            name="recycle"
+                            provider="MaterialCommunityIcons"
+                            size={24}
+                            color={colors.primary}
+                        />
+                        <Text style={styles.sectionText}>
+                            Plastique économisé / mois :{' '}
+                            {impact.plasticSavedPerMonth.toFixed(0)} g
+                        </Text>
+                    </View>
+                    <View style={styles.impactRow}>
+                        <AppIcon
+                            name="leaf"
+                            provider="Feather"
+                            size={24}
+                            color={colors.primarySoft}
+                        />
+                        <Text style={styles.sectionText}>
+                            CO₂ évité / mois : {impact.co2SavedPerMonth.toFixed(2)} kg
+                        </Text>
+                    </View>
+                </View>
+            ) : null}
 
-      <TouchableOpacity
-        style={[styles.shareButton, { backgroundColor: '#2e7d32' }]}
-        onPress={() => navigation.navigate('RefillMap', { selectedProducts })}
-      >
-        <Text style={styles.shareText}>Localiser une borne</Text>
-      </TouchableOpacity>
-    </ScrollView>
-  );
+            <AppButton
+                label="J'ai rechargé (simuler)"
+                icon={{ name: 'checkmark-done-outline', provider: 'Ionicons' }}
+                onPress={handleSimulateRefill}
+                style={styles.cta}
+            />
+
+            <AppButton
+                label="Localiser une borne"
+                icon={{ name: 'map-marker-radius', provider: 'MaterialCommunityIcons' }}
+                variant="outline"
+                onPress={() =>
+                    navigation.navigate('RefillMap', { selectedProducts })
+                }
+            />
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    ...(Platform.OS === 'web' && {
-      height: '100vh',
-      overflow: 'auto',
-    }),
-  },
-  content: {
-    flexGrow: 1,
-    padding: 20,
-    paddingTop: 60,
-    paddingBottom: 100, // Extra padding at bottom
-    ...(Platform.OS === 'web' && {
-      minHeight: '100vh',
-    }),
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  qrWrapper: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  qrInfo: {
-    fontSize: 14,
-    color: '#666',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  shareButton: {
-    backgroundColor: '#f8f9fa',
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-  },
-  shareText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  section: {
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 15,
-  },
-  sectionText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 10,
-  },
-  productRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  productEmoji: {
-    fontSize: 32,
-    marginRight: 15,
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: colors.surface,
+        ...(Platform.OS === 'web' && {
+            height: '100vh',
+            overflow: 'auto',
+        }),
+    },
+    content: {
+        flexGrow: 1,
+        paddingHorizontal: spacing.xl,
+        paddingBottom: spacing.xxl,
+        ...(Platform.OS === 'web' && {
+            minHeight: '100vh',
+        }),
+    },
+    qrCard: {
+        backgroundColor: colors.background,
+        borderRadius: radius.lg,
+        padding: spacing.lg,
+        marginBottom: spacing.xxl,
+        alignItems: 'center',
+        ...shadow.soft,
+    },
+    qrWrapper: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: spacing.lg,
+        minHeight: 240,
+    },
+    qrPlaceholder: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    qrPlaceholderText: {
+        marginTop: spacing.sm,
+        color: colors.textMuted,
+    },
+    qrInfo: {
+        fontSize: 14,
+        color: colors.textMuted,
+        textAlign: 'center',
+        marginBottom: spacing.lg,
+    },
+    section: {
+        marginBottom: spacing.xxl,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.textPrimary,
+        marginBottom: spacing.lg,
+    },
+    sectionText: {
+        fontSize: 14,
+        color: colors.textMuted,
+        marginBottom: spacing.sm,
+    },
+    productRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: spacing.sm,
+    },
+    productEmoji: {
+        fontSize: 32,
+        marginRight: spacing.lg,
+    },
+    productName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.textPrimary,
+    },
+    impactRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+    },
+    cta: {
+        marginBottom: spacing.md,
+    },
 });

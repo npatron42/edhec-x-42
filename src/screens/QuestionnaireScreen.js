@@ -1,361 +1,312 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  Platform,
-} from "react-native";
-import { questionnaire } from "../data/products";
-import { saveUserAnswers } from "../utils/storage";
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Platform,
+} from 'react-native';
+import { questionnaire } from '../data/products';
+import { saveUserAnswers } from '../utils/storage';
+import { colors, spacing, radius } from '../styles/theme';
+import { AppButton, AppHeader, AppIcon } from '../components/common';
+import ProgressBar from '../components/ProgressBar';
 
 export default function QuestionnaireScreen({ navigation }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [progress] = useState(new Animated.Value(0));
+    const [currentStep, setCurrentStep] = useState(0);
+    const [answers, setAnswers] = useState({});
 
-  const currentQuestion = questionnaire[currentStep];
-  const isLastStep = currentStep === questionnaire.length - 1;
-  const canProceed = answers[currentQuestion.id] !== undefined;
+    const currentQuestion = questionnaire[currentStep];
+    const isLastStep = currentStep === questionnaire.length - 1;
+    const canProceed = useMemo(() => {
+        return answers[currentQuestion.id] !== undefined;
+    }, [answers, currentQuestion.id]);
 
-  const handleSelectOption = (value) => {
-    const questionId = currentQuestion.id;
+    const handleSelectOption = (value) => {
+        const questionId = currentQuestion.id;
+        if (currentQuestion.type === 'multiple') {
+            const currentAnswers = answers[questionId] || [];
+            const maxSelections = currentQuestion.maxSelections || 999;
+            if (currentAnswers.includes(value)) {
+                setAnswers({
+                    ...answers,
+                    [questionId]: currentAnswers.filter((item) => item !== value),
+                });
+            } else if (currentAnswers.length < maxSelections) {
+                setAnswers({
+                    ...answers,
+                    [questionId]: [...currentAnswers, value],
+                });
+            }
+        } else {
+            setAnswers({
+                ...answers,
+                [questionId]: value,
+            });
+        }
+    };
 
-    if (currentQuestion.type === "multiple") {
-      const currentAnswers = answers[questionId] || [];
-      const maxSelections = currentQuestion.maxSelections || 999;
+    const isSelected = (value) => {
+        const questionId = currentQuestion.id;
+        if (currentQuestion.type === 'multiple') {
+            return (answers[questionId] || []).includes(value);
+        }
+        return answers[questionId] === value;
+    };
 
-      if (currentAnswers.includes(value)) {
-        // Désélectionner
-        setAnswers({
-          ...answers,
-          [questionId]: currentAnswers.filter((v) => v !== value),
-        });
-      } else if (currentAnswers.length < maxSelections) {
-        // Sélectionner
-        setAnswers({
-          ...answers,
-          [questionId]: [...currentAnswers, value],
-        });
-      }
-    } else {
-      // Single selection
-      setAnswers({
-        ...answers,
-        [questionId]: value,
-      });
-    }
-  };
+    const handleNext = () => {
+        if (!canProceed) {
+            return;
+        }
+        if (isLastStep) {
+            saveUserAnswers(answers);
+            navigation.navigate('ProductMatching', { answers });
+            return;
+        }
+        setCurrentStep((prev) => Math.min(questionnaire.length - 1, prev + 1));
+    };
 
-  const isSelected = (value) => {
-    const questionId = currentQuestion.id;
-    if (currentQuestion.type === "multiple") {
-      return (answers[questionId] || []).includes(value);
-    }
-    return answers[questionId] === value;
-  };
+    const handleBack = () => {
+        if (currentStep === 0) {
+            navigation.goBack();
+            return;
+        }
+        setCurrentStep((prev) => Math.max(0, prev - 1));
+    };
 
-  const handleNext = () => {
-    if (!canProceed) return;
-
-    if (isLastStep) {
-      // Sauvegarder et naviguer vers les recommandations
-      saveUserAnswers(answers);
-      navigation.navigate("ProductMatching", { answers });
-    } else {
-      setCurrentStep(currentStep + 1);
-      Animated.timing(progress, {
-        toValue: ((currentStep + 1) / questionnaire.length) * 100,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      Animated.timing(progress, {
-        toValue: ((currentStep - 1) / questionnaire.length) * 100,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    } else {
-      navigation.goBack();
-    }
-  };
-
-  const progressPercent = ((currentStep + 1) / questionnaire.length) * 100;
-
-  return (
-    <View style={styles.container}>
-      {/* Header avec progression */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Text style={styles.backButtonText}>←</Text>
-        </TouchableOpacity>
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View
-              style={[styles.progressFill, { width: `${progressPercent}%` }]}
+    return (
+        <View style={styles.container}>
+            <AppHeader
+                title="Questionnaire"
+                subtitle={`${currentStep + 1} / ${questionnaire.length}`}
+                onBack={handleBack}
+                containerStyle={styles.header}
             />
-          </View>
-          <Text style={styles.progressText}>
-            {currentStep + 1} / {questionnaire.length}
-          </Text>
-        </View>
-      </View>
 
-      {/* Contenu de la question */}
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={true}
-        scrollEnabled={true}
-        nestedScrollEnabled={true}
-      >
-        <Text style={styles.question}>{currentQuestion.question}</Text>
-        {currentQuestion.subtitle && (
-          <Text style={styles.subtitle}>{currentQuestion.subtitle}</Text>
-        )}
+            <View style={styles.progressWrapper}>
+                <ProgressBar
+                    current={currentStep + 1}
+                    total={questionnaire.length}
+                />
+            </View>
 
-        {currentQuestion.type === "multiple" &&
-          currentQuestion.maxSelections && (
-            <Text style={styles.hint}>
-              Sélectionnez jusqu'à {currentQuestion.maxSelections} options
-            </Text>
-          )}
-
-        <View style={styles.options}>
-          {currentQuestion.options.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.optionButton,
-                isSelected(option.value) && styles.optionButtonSelected,
-              ]}
-              onPress={() => handleSelectOption(option.value)}
+            <ScrollView
+                style={styles.content}
+                contentContainerStyle={styles.contentContainer}
+                showsVerticalScrollIndicator
             >
-              <Text style={styles.optionIcon}>{option.icon}</Text>
-              <View style={styles.optionContent}>
-                <Text
-                  style={[
-                    styles.optionLabel,
-                    isSelected(option.value) && styles.optionLabelSelected,
-                  ]}
-                >
-                  {option.label}
-                </Text>
-                {option.description && (
-                  <Text style={styles.optionDescription}>
-                    {option.description}
-                  </Text>
-                )}
-              </View>
-              <View
-                style={[
-                  styles.checkbox,
-                  isSelected(option.value) && styles.checkboxSelected,
-                ]}
-              >
-                {isSelected(option.value) && (
-                  <Text style={styles.checkmark}>✓</Text>
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+                <Text style={styles.question}>{currentQuestion.question}</Text>
+                {currentQuestion.subtitle ? (
+                    <Text style={styles.subtitle}>{currentQuestion.subtitle}</Text>
+                ) : null}
 
-      {/* Bouton suivant */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={[styles.nextButton, !canProceed && styles.nextButtonDisabled]}
-          onPress={handleNext}
-          disabled={!canProceed}
-        >
-          <Text style={styles.nextButtonText}>
-            {isLastStep ? "Voir mes recommandations" : "Suivant"}
-          </Text>
-          <Text style={styles.nextButtonIcon}>→</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+                {currentQuestion.type === 'multiple' &&
+                currentQuestion.maxSelections ? (
+                    <Text style={styles.hint}>
+                        Sélectionnez jusqu'à {currentQuestion.maxSelections} options
+                    </Text>
+                ) : null}
+
+                <View style={styles.options}>
+                    {currentQuestion.options.map((option) => {
+                        const selected = isSelected(option.value);
+                        const iconTint = selected ? colors.background : colors.primaryMuted;
+                        return (
+                            <TouchableOpacity
+                                key={option.value}
+                                style={[
+                                    styles.optionButton,
+                                    selected ? styles.optionButtonSelected : null,
+                                ]}
+                                onPress={() => handleSelectOption(option.value)}
+                                activeOpacity={0.8}
+                            >
+                                <View
+                                    style={[
+                                        styles.optionIcon,
+                                        selected ? styles.optionIconSelected : null,
+                                    ]}
+                                >
+                                    <AppIcon
+                                        name={option.icon?.name}
+                                        provider={option.icon?.provider}
+                                        size={28}
+                                        color={iconTint}
+                                    />
+                                </View>
+                                <View style={styles.optionContent}>
+                                    <Text
+                                        style={[
+                                            styles.optionLabel,
+                                            selected ? styles.optionLabelSelected : null,
+                                        ]}
+                                    >
+                                        {option.label}
+                                    </Text>
+                                    {option.description ? (
+                                        <Text style={styles.optionDescription}>
+                                            {option.description}
+                                        </Text>
+                                    ) : null}
+                                </View>
+                                <View
+                                    style={[
+                                        styles.checkbox,
+                                        selected ? styles.checkboxSelected : null,
+                                    ]}
+                                >
+                                    {selected ? (
+                                        <AppIcon
+                                            name="checkmark"
+                                            provider="Ionicons"
+                                            size={16}
+                                            color={colors.background}
+                                        />
+                                    ) : null}
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+            </ScrollView>
+
+            <View style={styles.footer}>
+                <AppButton
+                    onPress={handleNext}
+                    label={isLastStep ? 'Voir mes recommandations' : 'Suivant'}
+                    icon={{ name: 'arrow-forward', provider: 'Ionicons', size: 20 }}
+                    disabled={!canProceed}
+                    style={[
+                        styles.nextButton,
+                        !canProceed ? styles.nextButtonDisabled : null,
+                    ]}
+                />
+            </View>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#1c355b",
-  },
-  backButton: {
-    padding: 10,
-    marginRight: 15,
-  },
-  backButtonText: {
-    fontSize: 28,
-    color: "#1c355b",
-  },
-  progressContainer: {
-    flex: 1,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 3,
-    marginBottom: 8,
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#1c355b",
-    borderRadius: 3,
-  },
-  progressText: {
-    fontSize: 12,
-    color: "#666",
-    textAlign: "right",
-  },
-  content: {
-    flex: 1,
-    ...(Platform.OS === "web" && {
-      height: "calc(100vh - 120px)", // Full height minus header
-      overflow: "auto",
-    }),
-  },
-  contentContainer: {
-    flexGrow: 1,
-    padding: 20,
-    paddingBottom: 100, // Extra padding at bottom
-    ...(Platform.OS === "web" && {
-      minHeight: "calc(100vh - 120px)",
-    }),
-  },
-  question: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#1a1a1a",
-    marginBottom: 10,
-    lineHeight: 32,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 10,
-  },
-  hint: {
-    fontSize: 14,
-    color: "#1c355b",
-    marginBottom: 20,
-    fontStyle: "italic",
-  },
-  options: {
-    marginTop: 10,
-  },
-  optionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  optionButtonSelected: {
-    // A smooth linear-gradient effect between two close #1c355b variations for visual depth.
-    // React Native StyleSheet doesn't natively support gradients, but we can indicate the gradient intent here.
-    // Actual gradient must be implemented with a LinearGradient component for full effect!
-    backgroundColor: "transparent", // fallback for non-gradient environments
-    borderColor: "#1c355b",
-    // For demonstration, here's how you might indicate the gradient in StyleSheet:
-    // Use react-native-linear-gradient in the component render for real effect.
-    // Example usage (in component):
-    // <LinearGradient
-    //   colors={["#243e6b", "#1c355b"]}
-    //   start={{ x: 0, y: 0 }}
-    //   end={{ x: 1, y: 1 }}
-    //   style={styles.optionButton}
-    // >
-    //   ...contents...
-    // </LinearGradient>
-  },
-  optionIcon: {
-    fontSize: 32,
-    marginRight: 15,
-  },
-  optionContent: {
-    flex: 1,
-  },
-  optionLabel: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1a1a1a",
-  },
-  optionLabelSelected: {
-    color: "#1c355b",
-  },
-  optionDescription: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
-  },
-  checkbox: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: "#ccc",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  checkboxSelected: {
-    backgroundColor: "#1c355b",
-    borderColor: "#1c355b",
-  },
-  checkmark: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  footer: {
-    padding: 20,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
-  },
-  nextButton: {
-    backgroundColor: "#1c355b",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 18,
-    borderRadius: 12,
-  },
-  nextButtonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  nextButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginRight: 10,
-  },
-  nextButtonIcon: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    header: {
+        paddingTop: spacing.xxl,
+        paddingBottom: spacing.lg,
+    },
+    progressWrapper: {
+        paddingHorizontal: spacing.xl,
+        paddingBottom: spacing.md,
+        backgroundColor: colors.background,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.surfaceAlt,
+    },
+    content: {
+        flex: 1,
+        ...(Platform.OS === 'web' && {
+            height: 'calc(100vh - 160px)',
+            overflow: 'auto',
+        }),
+    },
+    contentContainer: {
+        flexGrow: 1,
+        paddingHorizontal: spacing.xl,
+        paddingBottom: spacing.xxl * 2,
+        paddingTop: spacing.xl,
+        ...(Platform.OS === 'web' && {
+            minHeight: 'calc(100vh - 160px)',
+        }),
+    },
+    question: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: colors.textPrimary,
+        marginBottom: spacing.sm,
+        lineHeight: 32,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: colors.textMuted,
+        marginBottom: spacing.md,
+    },
+    hint: {
+        fontSize: 14,
+        color: colors.primary,
+        marginBottom: spacing.lg,
+        fontStyle: 'italic',
+    },
+    options: {
+        marginTop: spacing.sm,
+    },
+    optionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.surface,
+        padding: spacing.lg,
+        borderRadius: radius.lg,
+        marginBottom: spacing.md,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    optionButtonSelected: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    optionIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: colors.surface,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: spacing.lg,
+    },
+    optionIconSelected: {
+        backgroundColor: colors.primaryDark,
+    },
+    optionContent: {
+        flex: 1,
+    },
+    optionLabel: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.textPrimary,
+    },
+    optionLabelSelected: {
+        color: colors.background,
+    },
+    optionDescription: {
+        fontSize: 14,
+        color: colors.primaryPale,
+        marginTop: spacing.xs,
+    },
+    checkbox: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        borderWidth: 2,
+        borderColor: colors.surfaceAlt,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.background,
+    },
+    checkboxSelected: {
+        backgroundColor: colors.primary,
+        borderColor: colors.background,
+    },
+    footer: {
+        paddingHorizontal: spacing.xl,
+        paddingVertical: spacing.lg,
+        borderTopWidth: 1,
+        borderTopColor: colors.surfaceAlt,
+        backgroundColor: colors.background,
+    },
+    nextButton: {
+        borderColor: 'transparent',
+    },
+    nextButtonDisabled: {
+        backgroundColor: colors.surfaceAlt,
+    },
 });
