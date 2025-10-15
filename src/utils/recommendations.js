@@ -103,25 +103,29 @@ export const calculateImpact = (products, frequency = 'monthly') => {
 export const getMatchMessage = (matchScore) => {
   if (matchScore >= 80) {
     return {
-      title: '🎉 Match Parfait !',
+      title: 'Match Parfait !',
+      icon: { provider: 'Ionicons', name: 'heart' },
       message: 'Ce produit est idéal pour vos besoins',
       color: '#1C355B',
     };
   } else if (matchScore >= 60) {
     return {
-      title: '✨ Excellent Match',
+      title: 'Excellent Match',
+      icon: { provider: 'Ionicons', name: 'heart' },
       message: 'Ce produit correspond bien à votre profil',
       color: '#3C5272',
     };
   } else if (matchScore >= 40) {
     return {
-      title: '👍 Bon Match',
+      title: 'Bon Match',
+      icon: { provider: 'Ionicons', name: 'heart' },
       message: 'Ce produit pourrait vous convenir',
       color: '#5D6F8A',
     };
   } else {
     return {
-      title: '🤔 À Essayer',
+      title: 'À Essayer',
+      icon: { provider: 'Ionicons', name: 'heart' },
       message: 'Découvrez ce produit',
       color: '#7D8CA1',
     };

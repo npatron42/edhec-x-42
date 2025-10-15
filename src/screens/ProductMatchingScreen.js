@@ -257,6 +257,12 @@ export default function ProductMatchingScreen({ route, navigation }) {
                                 { backgroundColor: matchInfo.color },
                             ]}
                         >
+                            <AppIcon
+                                name={matchInfo.icon.name}
+                                provider={matchInfo.icon.provider}
+                                size={12}
+                                color={colors.background}
+                            />
                             <Text style={styles.matchBadgeText}>{matchInfo.title}</Text>
                         </View>
                         <Text style={styles.cardEmoji}>{currentProduct.image}</Text>

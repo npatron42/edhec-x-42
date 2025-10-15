@@ -98,7 +98,6 @@ export const doveProducts = [
     },
 ];
 
-// Questions du questionnaire
 export const questionnaire = [
     {
         id: 'step1',
