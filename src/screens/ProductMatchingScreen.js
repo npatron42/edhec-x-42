@@ -10,6 +10,9 @@ import {
 } from 'react-native';
 import { getRecommendedProducts, getMatchMessage } from '../utils/recommendations';
 import { saveSelectedProducts } from '../utils/storage';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Entypo from '@expo/vector-icons/Entypo';
+
 
 const { width, height } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 120;
@@ -239,17 +242,17 @@ export default function ProductMatchingScreen({ route, navigation }) {
       {/* Action buttons */}
       <View style={styles.actions}>
         <TouchableOpacity style={[styles.actionButton, styles.passButton]} onPress={handlePass}>
-          <Text style={styles.actionButtonIcon}>✕</Text>
+          <Entypo name="cross" size={36} color="#1C355B" />
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.actionButton, styles.likeButton]} onPress={handleLike}>
-          <Text style={styles.actionButtonIcon}>❤️</Text>
+          <Ionicons name="heart" size={32} color="#fff" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.likedCount}>
         <Text style={styles.likedCountText}>
-          ❤️ {likedProducts.length} produit(s) sélectionné(s)
+          {likedProducts.length} produit(s) sélectionné(s)
         </Text>
       </View>
 
@@ -332,9 +335,9 @@ const styles = StyleSheet.create({
   likeText: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#1c355b',
     borderWidth: 4,
-    borderColor: '#4CAF50',
+    borderColor: '#1c355b',
     padding: 10,
     borderRadius: 10,
   },
@@ -348,9 +351,9 @@ const styles = StyleSheet.create({
   nopeText: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#f44336',
+    color: '#1C355B',
     borderWidth: 4,
-    borderColor: '#f44336',
+    borderColor: '#1C355B',
     padding: 10,
     borderRadius: 10,
   },
@@ -468,10 +471,10 @@ const styles = StyleSheet.create({
   passButton: {
     backgroundColor: '#fff',
     borderWidth: 2,
-    borderColor: '#f44336',
+    borderColor: '#1C355B',
   },
   likeButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#1c355b',
   },
   actionButtonIcon: {
     fontSize: 32,

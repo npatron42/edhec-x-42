@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,9 @@ import {
   ScrollView,
   Animated,
   Platform,
-} from 'react-native';
-import { questionnaire } from '../data/products';
-import { saveUserAnswers } from '../utils/storage';
+} from "react-native";
+import { questionnaire } from "../data/products";
+import { saveUserAnswers } from "../utils/storage";
 
 export default function QuestionnaireScreen({ navigation }) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -23,7 +23,7 @@ export default function QuestionnaireScreen({ navigation }) {
   const handleSelectOption = (value) => {
     const questionId = currentQuestion.id;
 
-    if (currentQuestion.type === 'multiple') {
+    if (currentQuestion.type === "multiple") {
       const currentAnswers = answers[questionId] || [];
       const maxSelections = currentQuestion.maxSelections || 999;
 
@@ -31,7 +31,7 @@ export default function QuestionnaireScreen({ navigation }) {
         // Désélectionner
         setAnswers({
           ...answers,
-          [questionId]: currentAnswers.filter(v => v !== value),
+          [questionId]: currentAnswers.filter((v) => v !== value),
         });
       } else if (currentAnswers.length < maxSelections) {
         // Sélectionner
@@ -51,7 +51,7 @@ export default function QuestionnaireScreen({ navigation }) {
 
   const isSelected = (value) => {
     const questionId = currentQuestion.id;
-    if (currentQuestion.type === 'multiple') {
+    if (currentQuestion.type === "multiple") {
       return (answers[questionId] || []).includes(value);
     }
     return answers[questionId] === value;
@@ -63,7 +63,7 @@ export default function QuestionnaireScreen({ navigation }) {
     if (isLastStep) {
       // Sauvegarder et naviguer vers les recommandations
       saveUserAnswers(answers);
-      navigation.navigate('ProductMatching', { answers });
+      navigation.navigate("ProductMatching", { answers });
     } else {
       setCurrentStep(currentStep + 1);
       Animated.timing(progress, {
@@ -98,7 +98,9 @@ export default function QuestionnaireScreen({ navigation }) {
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
+            <View
+              style={[styles.progressFill, { width: `${progressPercent}%` }]}
+            />
           </View>
           <Text style={styles.progressText}>
             {currentStep + 1} / {questionnaire.length}
@@ -107,8 +109,8 @@ export default function QuestionnaireScreen({ navigation }) {
       </View>
 
       {/* Contenu de la question */}
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={true}
         scrollEnabled={true}
@@ -119,11 +121,12 @@ export default function QuestionnaireScreen({ navigation }) {
           <Text style={styles.subtitle}>{currentQuestion.subtitle}</Text>
         )}
 
-        {currentQuestion.type === 'multiple' && currentQuestion.maxSelections && (
-          <Text style={styles.hint}>
-            Sélectionnez jusqu'à {currentQuestion.maxSelections} options
-          </Text>
-        )}
+        {currentQuestion.type === "multiple" &&
+          currentQuestion.maxSelections && (
+            <Text style={styles.hint}>
+              Sélectionnez jusqu'à {currentQuestion.maxSelections} options
+            </Text>
+          )}
 
         <View style={styles.options}>
           {currentQuestion.options.map((option, index) => (
@@ -146,7 +149,9 @@ export default function QuestionnaireScreen({ navigation }) {
                   {option.label}
                 </Text>
                 {option.description && (
-                  <Text style={styles.optionDescription}>{option.description}</Text>
+                  <Text style={styles.optionDescription}>
+                    {option.description}
+                  </Text>
                 )}
               </View>
               <View
@@ -155,7 +160,9 @@ export default function QuestionnaireScreen({ navigation }) {
                   isSelected(option.value) && styles.checkboxSelected,
                 ]}
               >
-                {isSelected(option.value) && <Text style={styles.checkmark}>✓</Text>}
+                {isSelected(option.value) && (
+                  <Text style={styles.checkmark}>✓</Text>
+                )}
               </View>
             </TouchableOpacity>
           ))}
@@ -170,7 +177,7 @@ export default function QuestionnaireScreen({ navigation }) {
           disabled={!canProceed}
         >
           <Text style={styles.nextButtonText}>
-            {isLastStep ? 'Voir mes recommandations' : 'Suivant'}
+            {isLastStep ? "Voir mes recommandations" : "Suivant"}
           </Text>
           <Text style={styles.nextButtonIcon}>→</Text>
         </TouchableOpacity>
@@ -182,17 +189,17 @@ export default function QuestionnaireScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#1c355b",
   },
   backButton: {
     padding: 10,
@@ -200,76 +207,90 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 28,
-    color: '#2e7d32',
+    color: "#1c355b",
   },
   progressContainer: {
     flex: 1,
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: "#e0e0e0",
     borderRadius: 3,
     marginBottom: 8,
   },
   progressFill: {
-    height: '100%',
-    backgroundColor: '#2e7d32',
+    height: "100%",
+    backgroundColor: "#1c355b",
     borderRadius: 3,
   },
   progressText: {
     fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
+    color: "#666",
+    textAlign: "right",
   },
   content: {
     flex: 1,
-    ...(Platform.OS === 'web' && {
-      height: 'calc(100vh - 120px)', // Full height minus header
-      overflow: 'auto',
+    ...(Platform.OS === "web" && {
+      height: "calc(100vh - 120px)", // Full height minus header
+      overflow: "auto",
     }),
   },
   contentContainer: {
     flexGrow: 1,
     padding: 20,
     paddingBottom: 100, // Extra padding at bottom
-    ...(Platform.OS === 'web' && {
-      minHeight: 'calc(100vh - 120px)',
+    ...(Platform.OS === "web" && {
+      minHeight: "calc(100vh - 120px)",
     }),
   },
   question: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontWeight: "bold",
+    color: "#1a1a1a",
     marginBottom: 10,
     lineHeight: 32,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginBottom: 10,
   },
   hint: {
     fontSize: 14,
-    color: '#2e7d32',
+    color: "#1c355b",
     marginBottom: 20,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   options: {
     marginTop: 10,
   },
   optionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
     padding: 20,
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   optionButtonSelected: {
-    backgroundColor: '#e8f5e9',
-    borderColor: '#2e7d32',
+    // A smooth linear-gradient effect between two close #1c355b variations for visual depth.
+    // React Native StyleSheet doesn't natively support gradients, but we can indicate the gradient intent here.
+    // Actual gradient must be implemented with a LinearGradient component for full effect!
+    backgroundColor: "transparent", // fallback for non-gradient environments
+    borderColor: "#1c355b",
+    // For demonstration, here's how you might indicate the gradient in StyleSheet:
+    // Use react-native-linear-gradient in the component render for real effect.
+    // Example usage (in component):
+    // <LinearGradient
+    //   colors={["#243e6b", "#1c355b"]}
+    //   start={{ x: 0, y: 0 }}
+    //   end={{ x: 1, y: 1 }}
+    //   style={styles.optionButton}
+    // >
+    //   ...contents...
+    // </LinearGradient>
   },
   optionIcon: {
     fontSize: 32,
@@ -280,15 +301,15 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontWeight: "600",
+    color: "#1a1a1a",
   },
   optionLabelSelected: {
-    color: '#2e7d32',
+    color: "#1c355b",
   },
   optionDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   checkbox: {
@@ -296,45 +317,45 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
   },
   checkboxSelected: {
-    backgroundColor: '#2e7d32',
-    borderColor: '#2e7d32',
+    backgroundColor: "#1c355b",
+    borderColor: "#1c355b",
   },
   checkmark: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   footer: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
   },
   nextButton: {
-    backgroundColor: '#2e7d32',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#1c355b",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 18,
     borderRadius: 12,
   },
   nextButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
   },
   nextButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginRight: 10,
   },
   nextButtonIcon: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
