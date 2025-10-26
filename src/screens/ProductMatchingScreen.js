@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, PanResponder, Dimensions } from 'react-native';
 import { AppButton, AppHeader, AppIcon } from '../components/common';
-import { getRecommendedProducts, getMatchMessage } from '../utils/recommendations';
+//import { getRecommendedProducts, getMatchMessage } from '../utils/recommendations';
 import { saveSelectedProducts } from '../utils/storage';
 import { colors, spacing, radius, shadow } from '../styles/theme';
+import { createQRCodeData } from '../utils/qrGenerator';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width - spacing.xl * 2;
