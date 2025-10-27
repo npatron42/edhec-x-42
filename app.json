@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "challenge_edhec",
+    "slug": "challenge_edhec",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Cette application utilise la caméra pour analyser votre peau avec une IA. L’analyse peut être réalisée sur l’appareil ou via un service cloud sécurisé. Aucune photo n’est conservée.",
+        "NSPhotoLibraryUsageDescription": "Cette application accède à votre galerie pour sélectionner un selfie et générer un diagnostic beauté avec une IA. Aucune photo n’est conservée."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "CAMERA"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {}
+  }
+}
