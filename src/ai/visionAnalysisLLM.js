@@ -1,16 +1,28 @@
 // Analyse vision uniquement via Gemini: retourne un JSON d'analyse visage+cheveux, sans recommandations.
 import { getGeminiKey } from '../env/config';
 
+// Prioriser les modèles rapides et limiter le fallback
 const VERSION_CANDIDATES = ['v1beta', 'v1'];
 const MODEL_CANDIDATES = [
   'gemini-2.5-flash',
-  'gemini-2.0-pro-latest',
-  'gemini-2.0-pro',
   'gemini-2.0-flash-latest',
-  'gemini-2.0-flash',
-  'gemini-1.5-pro',
-  'gemini-1.5-flash',
 ];
+
+const REQ_TIMEOUT_MS = 12000;   // timeout par tentative
+const BUDGET_TIMEOUT_MS = 20000; // budget global pour cette étape
+
+async function fetchWithTimeout(url, options={}, timeoutMs=REQ_TIMEOUT_MS){
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch(e){
+    clearTimeout(id);
+    throw e;
+  }
+}
 
 export async function analyzeVisionOnly({ base64, envSignals }){
   const apiKey = getGeminiKey();
@@ -21,8 +33,10 @@ export async function analyzeVisionOnly({ base64, envSignals }){
   const prompt = buildPrompt(envSignals || {});
 
   let lastError = null;
+  const started = Date.now();
   for (const ver of VERSION_CANDIDATES){
     for (const model of MODEL_CANDIDATES){
+      if (Date.now() - started > BUDGET_TIMEOUT_MS) { lastError = lastError || new Error('Timeout analyse vision'); break; }
       const body = {
         contents: [
           {
@@ -40,7 +54,7 @@ export async function analyzeVisionOnly({ base64, envSignals }){
       };
       const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
       try {
-        const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const res = await fetchWithTimeout(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, REQ_TIMEOUT_MS);
         if (!res.ok){
           let raw = ''; try { raw = await res.text(); } catch {}
           const err = new Error(raw || `Gemini HTTP ${res.status}`);

@@ -37,15 +37,14 @@ export default function BeautyAnalysisScreen({ route, navigation }){
 
         let analysis = null; let outRecs = [];
         try {
-          // Étape 1: analyse vision → JSON
+          // Étape 1 + 2
           const a = await analyzeVisionOnly({ base64, envSignals: env });
-          analysis = a;
-          // Étape 2: recommandations basées sur l’analyse
           const r = await recommendFromAnalysis({ analysisJson: a, products: doveProducts });
-          outRecs = r?.recommendations || [];
+          analysis = a; outRecs = r?.recommendations || [];
         } catch (gerr) {
           console.error('[AI] Pipeline LLM KO', { code: gerr?.code, message: gerr?.message });
-          setError(gerr?.code === 429 ? 'Quota IA dépassé. Réessayez plus tard.' : 'Analyse IA indisponible. Vérifiez la connexion et la clé.');
+          const msg = gerr?.message?.includes('Timeout') ? 'Délai dépassé. Réessayez dans un instant.' : (gerr?.code === 429 ? 'Quota IA dépassé. Réessayez plus tard.' : 'Analyse IA indisponible. Vérifiez la connexion et la clé.');
+          setError(msg);
           setProfile(null);
           setRecs([]);
           return;
