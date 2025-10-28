@@ -31,6 +31,7 @@ import { AppButton } from "../components/common/index.js"
 import { useTheme } from "../styles/ThemeProvider.js"
 
 import DahsboardHeader from "../components/dahsboard/DahsboardHeader.js"
+import DashboardGrid from "../components/dahsboard/DashboardGrid.js"
 
 export default function DashboardScreen({ navigation }) {
 	const { isDark, colors } = useTheme()
@@ -72,35 +73,10 @@ export default function DashboardScreen({ navigation }) {
 	const headerHeight = screenHeight / 4
 
 	return (
-		<View
-			style={[styles.container, { backgroundColor: colors.background }]}
-		>
+		<View style={[styles.container, { backgroundColor: "#e9ecef" }]}>
 			<DahsboardHeader navigation={navigation} />
-			<View style={[styles.content, { paddingTop: headerHeight }]}>
-				<LinearGradient
-					colors={[colors.primary, colors.accent]}
-					start={{ x: 0, y: 0 }}
-					end={{ x: 1, y: 1 }}
-					style={[
-						styles.heroBanner,
-						{ borderColor: "#d9c484", borderWidth: 5 },
-					]}
-				>
-					<View
-						style={{
-							alignItems: "center",
-							justifyContent: "center",
-							gap: spacing.md,
-						}}
-					>
-						<AppButton
-							label="Analyse de la peau"
-							icon={{ name: "scan", provider: "Ionicons" }}
-							onPress={() => navigation.navigate("CameraCapture")}
-							style={{ minWidth: 240, alignSelf: "center" }}
-						/>
-					</View>
-				</LinearGradient>
+			<View style={[styles.content, { paddingTop: headerHeight  }]}>
+				<DashboardGrid />
 			</View>
 		</View>
 	)
