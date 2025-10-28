@@ -1,11 +1,15 @@
+// ##
+// # Copyright (c) 2025 - Indigen Solutions
+// # Authors:
+// #   - Nicolas Patron <nicolas.patron@indigen.com>
+// # NOTICE: All information contained herein is, and remains
+// # the property of Indigen Solutions and its suppliers, if any.
+// # Dissemination of this information or reproduction of this material
+// # is strictly forbidden unless prior written permission is obtained
+// # from Indigen Solutions.
+
 import React, { useState, useEffect } from "react"
-import {
-	View,
-	Text,
-	StyleSheet,
-	ScrollView,
-	RefreshControl,
-} from "react-native"
+import { View, Text, StyleSheet, Dimensions } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { LinearGradient } from "expo-linear-gradient"
 import {
@@ -14,17 +18,19 @@ import {
 	getUserAnswers,
 	getSelectedProducts,
 	getUserProfile,
-} from "../utils/storage"
-import { formatImpactStats } from "../utils/recommendations"
+} from "../utils/storage.js"
 import {
 	colors as lightColors,
 	spacing,
 	radius,
 	shadow,
 	typography,
-} from "../styles/theme"
-import { AppButton, AppIcon } from "../components/common"
-import { useTheme } from "../styles/ThemeProvider"
+} from "../styles/theme.js"
+
+import { AppButton } from "../components/common/index.js"
+import { useTheme } from "../styles/ThemeProvider.js"
+
+import DahsboardHeader from "../components/dahsboard/DahsboardHeader.js"
 
 export default function DashboardScreen({ navigation }) {
 	const { isDark, colors } = useTheme()
@@ -62,92 +68,15 @@ export default function DashboardScreen({ navigation }) {
 		}
 	}, [])
 
-	const onRefresh = async () => {
-		setRefreshing(true)
-		await loadData()
-		setRefreshing(false)
-	}
-
-	const formattedStats = stats ? formatImpactStats(stats) : null
-	const availableDiscounts = (profile?.rewards?.discounts || []).filter(
-		(discount) => !discount.used,
-	)
-
-	// Revenir à 4 cartes d'économies: argent, plastique, CO2, recharges
-	const savingsKeys = ["money", "plastic", "co2", "refills"]
-
-	const openPreviousSummary = () => {
-		const answers = userProfile?.answers || null
-		const bp = answers?._beautyProfile || null
-		if (!answers || !bp) {
-			navigation.navigate("CameraCapture")
-			return
-		}
-		const hair = bp.ai?.hair || null
-		const analysis = {
-			skinType: bp.ai?.skin_type || "—",
-			needs: Array.isArray(bp.ai?.needs) ? bp.ai.needs : [],
-			notes: Array.isArray(bp.ai?.notes)
-				? bp.ai.notes
-				: bp.rationale
-				? [bp.rationale]
-				: [],
-			hair: hair
-				? {
-						type: hair.type || "--",
-						density: hair.density || undefined,
-						frizz:
-							typeof hair.frizz === "number"
-								? hair.frizz
-								: undefined,
-						shine:
-							typeof hair.shine === "number"
-								? hair.shine
-								: undefined,
-				  }
-				: undefined,
-		}
-		navigation.navigate("SkinSummary", {
-			analysis,
-			answers,
-			photoBase64: null,
-		})
-	}
+	const screenHeight = Dimensions.get("screen").height
+	const headerHeight = screenHeight / 4
 
 	return (
-		<SafeAreaView
-			style={[styles.safeArea, { backgroundColor: colors.background }]}
+		<View
+			style={[styles.container, { backgroundColor: colors.background }]}
 		>
-			<ScrollView
-				style={[styles.container]}
-				contentContainerStyle={[
-					styles.content,
-					{ paddingBottom: spacing.xxxl * 2 },
-				]}
-				showsVerticalScrollIndicator={false}
-				refreshControl={
-					<RefreshControl
-						refreshing={refreshing}
-						onRefresh={onRefresh}
-						colors={[colors.primary]}
-						tintColor={colors.primary}
-					/>
-				}
-			>
-				<View style={styles.helloContainer}>
-					<Text style={styles.helloH1}>Bonjour,</Text>
-					<Text style={styles.helloName}>
-						{profile?.name || "Beauty Pioneer"}
-					</Text>
-					<AppIcon
-						name="person-circle-outline"
-						onPress={() => navigation.navigate("Profile")}
-						provider="Ionicons"
-						size={36}
-						color={colors.primary}
-						style={{ marginLeft: 120 }}
-					/>
-				</View>
+			<DahsboardHeader navigation={navigation} />
+			<View style={[styles.content, { paddingTop: headerHeight }]}>
 				<LinearGradient
 					colors={[colors.primary, colors.accent]}
 					start={{ x: 0, y: 0 }}
@@ -170,124 +99,17 @@ export default function DashboardScreen({ navigation }) {
 							onPress={() => navigation.navigate("CameraCapture")}
 							style={{ minWidth: 240, alignSelf: "center" }}
 						/>
-						<AppButton
-							variant="subtle"
-							label="Vos recommendations"
-							icon={{
-								name: "document-text",
-								provider: "Ionicons",
-								color: colors.primary,
-							}}
-							onPress={openPreviousSummary}
-							style={{
-								backgroundColor: "white",
-								marginTop: spacing.sm,
-								alignSelf: "center",
-							}}
-						/>
 					</View>
 				</LinearGradient>
-
-				{formattedStats ? (
-					<View
-						style={[
-							styles.section,
-							{ paddingHorizontal: spacing.xl },
-						]}
-					>
-						<View style={styles.statsGrid}>
-							{savingsKeys.map((k, index) => {
-								const stat = formattedStats[k]
-								if (!stat) return null
-								const grad =
-									index === 0
-										? [colors.primary, "#0F68A3"]
-										: index === 1
-										? ["#ffffff", "#165185"]
-										: index === 2
-										? ["#ffffff", "#165185"]
-										: [colors.backgroundAlt, colors.surface]
-								return (
-									<View
-										key={`saving-${k}`}
-										style={styles.statCard}
-									>
-										<LinearGradient
-											colors={grad}
-											start={{ x: 0, y: 0 }}
-											end={{ x: 1, y: 1 }}
-											style={styles.statGradient}
-										>
-											<View
-												style={[
-													styles.statIconWrapper,
-													{
-														backgroundColor:
-															colors.background,
-													},
-												]}
-											>
-												<AppIcon
-													name={stat.icon?.name}
-													provider={
-														stat.icon?.provider
-													}
-													size={22}
-													color={
-														index === 1
-															? colors.accent
-															: colors.primary
-													}
-												/>
-											</View>
-											<Text
-												style={[
-													styles.statValue,
-													{
-														color: colors.textPrimary,
-													},
-												]}
-											>
-												{stat.value} {stat.unit}
-											</Text>
-											<Text
-												style={[
-													styles.statLabel,
-													{
-														color: colors.textSecondary,
-													},
-												]}
-											>
-												{stat.label}
-											</Text>
-											{stat.equivalence ? (
-												<Text
-													style={[
-														styles.statEquivalence,
-														{
-															color: colors.textMuted,
-														},
-													]}
-												>
-													{stat.equivalence}
-												</Text>
-											) : null}
-										</LinearGradient>
-									</View>
-								)
-							})}
-						</View>
-					</View>
-				) : null}
-			</ScrollView>
-		</SafeAreaView>
+			</View>
+		</View>
 	)
 }
 
 const styles = StyleSheet.create({
 	safeArea: { flex: 1 },
 	container: { flex: 1 },
-	content: { flexGrow: 1 },
+	content: { flex: 1 },
 	helloContainer: {
 		marginHorizontal: spacing.xl,
 		padding: spacing.xl,

@@ -19,7 +19,6 @@ import DashboardScreen from "./src/screens/DashboardScreen";
 import RefillMapScreen from "./src/screens/RefillMapScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import SkinSummaryScreen from "./src/screens/SkinSummaryScreen";
-import BeautyAnalysisScreen from "./src/screens/BeautyAnalysisScreen";
 import HistoryScreen from "./src/screens/HistoryScreen";
 import ProductsScreen from "./src/screens/ProductsScreen";
 import { ThemeProvider, useTheme } from "./src/styles/ThemeProvider";
@@ -95,10 +94,6 @@ function AppInner() {
         >
           <Stack.Screen name="Auth" component={AuthScreen} />
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen
-            name="BeautyAnalysis"
-            component={BeautyAnalysisScreen}
-          />
           <Stack.Screen
             name="ProductMatching"
             component={ProductMatchingScreen}
