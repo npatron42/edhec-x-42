@@ -8,8 +8,8 @@ const MODEL_CANDIDATES = [
   'gemini-2.0-flash-latest',
 ];
 
-const REQ_TIMEOUT_MS = 12000;   // timeout par tentative
-const BUDGET_TIMEOUT_MS = 20000; // budget global pour cette étape
+const REQ_TIMEOUT_MS = 18000;   // timeout par tentative (augmenté)
+const BUDGET_TIMEOUT_MS = 32000; // budget global (augmenté)
 
 async function fetchWithTimeout(url, options={}, timeoutMs=REQ_TIMEOUT_MS){
   const controller = new AbortController();
