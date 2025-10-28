@@ -61,6 +61,7 @@ export default function AppHeader({
 
 const styles = StyleSheet.create({
     container: {
+        paddingTop: 100,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
