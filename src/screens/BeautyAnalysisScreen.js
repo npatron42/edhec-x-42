@@ -9,6 +9,8 @@ import { analyzeWithGemini } from '../ai/geminiAnalysis';
 import { saveUserAnswers } from '../utils/storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../styles/ThemeProvider';
+import { analyzeVisionOnly } from '../ai/visionAnalysisLLM';
+import { recommendFromAnalysis } from '../ai/recoLLM';
 
 export default function BeautyAnalysisScreen({ route, navigation }){
   const { colors } = useTheme();
@@ -33,12 +35,16 @@ export default function BeautyAnalysisScreen({ route, navigation }){
         const env = coords ? await fetchEnvSignals(coords) : {};
         console.log('[AI] Signaux environnement', env);
 
-        let out = null;
+        let analysis = null; let outRecs = [];
         try {
-          out = await analyzeWithGemini({ base64, envSignals: env, products: doveProducts });
-          console.log('[AI] Analyse Gemini réussie');
+          // Étape 1: analyse vision → JSON
+          const a = await analyzeVisionOnly({ base64, envSignals: env });
+          analysis = a;
+          // Étape 2: recommandations basées sur l’analyse
+          const r = await recommendFromAnalysis({ analysisJson: a, products: doveProducts });
+          outRecs = r?.recommendations || [];
         } catch (gerr) {
-          console.error('[AI] Gemini KO', { code: gerr?.code, message: gerr?.message });
+          console.error('[AI] Pipeline LLM KO', { code: gerr?.code, message: gerr?.message });
           setError(gerr?.code === 429 ? 'Quota IA dépassé. Réessayez plus tard.' : 'Analyse IA indisponible. Vérifiez la connexion et la clé.');
           setProfile(null);
           setRecs([]);
@@ -49,23 +55,21 @@ export default function BeautyAnalysisScreen({ route, navigation }){
         const p = {
           source: 'ai',
           ai: {
-            skin_type: out?.analysis?.skin_type || null,
-            needs: Array.isArray(out?.analysis?.needs) ? out.analysis.needs : [],
-            notes: Array.isArray(out?.analysis?.notes) ? out.analysis.notes : [],
-            // Nouveaux champs cheveux depuis l'IA
-            hair: out?.analysis?.hair ? {
-              type: out.analysis.hair.type ?? '--',
-              density: out.analysis.hair.density ?? null,
-              frizz: typeof out.analysis.hair.frizz === 'number' ? out.analysis.hair.frizz : null,
-              shine: typeof out.analysis.hair.shine === 'number' ? out.analysis.hair.shine : null,
+            skin_type: analysis?.skin_type || null,
+            needs: Array.isArray(analysis?.needs) ? analysis.needs : [],
+            notes: Array.isArray(analysis?.notes) ? analysis.notes : [],
+            hair: analysis?.hair ? {
+              type: analysis.hair.type ?? '--',
+              density: analysis.hair.density ?? null,
+              frizz: typeof analysis.hair.frizz === 'number' ? analysis.hair.frizz : null,
+              shine: typeof analysis.hair.shine === 'number' ? analysis.hair.shine : null,
             } : { type: '--', density: null, frizz: null, shine: null },
           },
-          rationale: out?.rationale || '',
+          rationale: '',
           env,
         };
         setProfile(p);
-        const mappedRecs = out.recommendations || [];
-        setRecs(mappedRecs);
+        setRecs(outRecs);
 
         // Sauvegarder automatiquement le dernier bilan IA (sans photo)
         try {
@@ -80,10 +84,10 @@ export default function BeautyAnalysisScreen({ route, navigation }){
           };
           const autoAnswers = {
             _beautyProfile: p,
-            _aiRecs: Array.isArray(mappedRecs) ? mappedRecs.slice(0, 8) : [],
+            _aiRecs: Array.isArray(outRecs) ? outRecs.slice(0, 8) : [],
             step1: p?.ai?.skin_type || (p?.skin_tone ? (p.skin_tone.mst_bin <= 3 ? 'sec' : p.skin_tone.mst_bin >= 7 ? 'gras' : 'normal') : 'normal'),
             step2: (p?.env?.uv_index ?? 4) > 6 ? 'élevée' : (p?.env?.humidity ?? 50) > 70 ? 'moyenne' : 'faible',
-            step3: mappedRecs.map(r => r.category).slice(0,2),
+            step3: outRecs.map(r => r.category).slice(0,2),
             step4: inferNeedsFromProfile(p),
             step5: 'monthly',
           };

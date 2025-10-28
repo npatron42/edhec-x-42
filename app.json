@@ -26,12 +26,23 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
+        "CAMERA",
         "CAMERA"
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {}
+    "extra": {
+      "eas": {
+        "projectId": "c4ae5b96-30a4-413e-ad9a-2fc848c5b947"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c4ae5b96-30a4-413e-ad9a-2fc848c5b947"
+    }
   }
 }

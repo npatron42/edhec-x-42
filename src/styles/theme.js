@@ -1,16 +1,22 @@
 export const colors = {
-    // Light theme (glass)
-    primary: '#4F9CF9',
-    primaryDark: '#1D6FE3',
-    primaryLight: '#8ABCFB',
-    primarySoft: 'rgba(79,156,249,0.12)',
+    // Light theme (Vaseline brand)
+    primary: '#0B1D4D',        // Deep Navy (header Vaseline)
+    primaryDark: '#00153D',    // Darker Navy
+    primaryLight: '#2C5FB8',   // Royal Blue
+    primarySoft: 'rgba(11,29,77,0.12)',
 
-    accent: '#22D3EE',
-    accentDark: '#06B6D4',
-    accentLight: '#BAF2FB',
+    // Accent: bleu clair du dégradé
+    accent: '#2C5FB8',
+    accentDark: '#1E56A0',
+    accentLight: '#A9C5FF',
 
-    background: '#F6FAFF',
-    backgroundAlt: '#ECF3FF',
+    // Doré (barres/accents)
+    brandGold: '#E6C067',
+    brandGoldDark: '#C89A2B',
+    brandGoldSoft: 'rgba(230,192,103,0.20)',
+
+    background: '#F7FAFF',
+    backgroundAlt: '#EFF4FF',
     // Glass surfaces
     surface: 'rgba(255,255,255,0.70)',
     surfaceElevated: 'rgba(255,255,255,0.82)',
@@ -31,23 +37,29 @@ export const colors = {
     danger: '#EF4444',
     info: '#3B82F6',
 
-    gradientStart: '#4F9CF9',
-    gradientEnd: '#22D3EE',
+    // Dégradé Vaseline
+    gradientStart: '#0B1D4D',
+    gradientEnd: '#2C5FB8',
 };
 
 export const darkColors = {
-    // Dark theme (softer, less black) + glass
-    primary: '#60A5FA',
-    primaryDark: '#3B82F6',
-    primaryLight: '#93C5FD',
-    primarySoft: 'rgba(96,165,250,0.12)',
+    // Dark theme (Vaseline) + glass
+    primary: '#2C5FB8',
+    primaryDark: '#1E56A0',
+    primaryLight: '#5F8FE0',
+    primarySoft: 'rgba(44,95,184,0.12)',
 
-    accent: '#22D3EE',
-    accentDark: '#06B6D4',
-    accentLight: '#67E8F9',
+    accent: '#82A6FF',
+    accentDark: '#5E86FF',
+    accentLight: '#BBD0FF',
 
-    background: '#101726',
-    backgroundAlt: '#151F34',
+    // Doré en sombre
+    brandGold: '#F0D27A',
+    brandGoldDark: '#D1AA3A',
+    brandGoldSoft: 'rgba(240,210,122,0.22)',
+
+    background: '#0E1526',
+    backgroundAlt: '#121B33',
     // Glass surfaces
     surface: 'rgba(255,255,255,0.06)',
     surfaceElevated: 'rgba(255,255,255,0.10)',
@@ -68,8 +80,8 @@ export const darkColors = {
     danger: '#F87171',
     info: '#60A5FA',
 
-    gradientStart: '#0EA5E9',
-    gradientEnd: '#22D3EE',
+    gradientStart: '#00153D',
+    gradientEnd: '#2C5FB8',
 };
 
 export const spacing = {
@@ -169,15 +181,16 @@ export const shadow = {
         elevation: 8,
     },
     soft: {
-        // Subtle neon-like glow
-        shadowColor: '#4F9CF980',
+        // Subtle brand-colored glow (blue)
+        shadowColor: '#2C5FB880',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.35,
         shadowRadius: 20,
         elevation: 6,
     },
     strong: {
-        shadowColor: '#22D3EE88',
+        // Mélange léger bleu/doré
+        shadowColor: '#E6C06766',
         shadowOffset: { width: 0, height: 16 },
         shadowOpacity: 0.4,
         shadowRadius: 32,
