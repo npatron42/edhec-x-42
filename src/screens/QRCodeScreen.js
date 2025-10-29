@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react"
-import { View, Text, StyleSheet, Share, Platform } from "react-native"
+import {
+	View,
+	Text,
+	StyleSheet,
+	Share,
+	Platform,
+	TouchableOpacity,
+} from "react-native"
 
 import { SafeAreaView } from "react-native-safe-area-context"
 import QRCode from "react-native-qrcode-svg"
@@ -35,39 +42,91 @@ export default function QRCodeScreen({ route, navigation }) {
 		>
 			<Header
 				headerTitle="QR Code"
-				headerSubtitle="Générez un QR Code pour vos préférences et les produits sélectionnés"
+				headerSubtitle="Utilisez votre QR Code sur l'une de nos bornes pour remplir vos produits Vaseline."
 				navigation={navigation}
 			/>
-			<View
-				style={[
-					styles.qrCard,
-				]}
-			>
-				<View style={styles.qrWrapper}>
-					{qrData ? (
-						<QRCode value={qrData} size={300} />
-					) : (
-						<View style={styles.qrPlaceholder}>
+			<View style={styles.centeredContainer}>
+				<View
+					style={[
+						styles.qrCard,
+						{ backgroundColor: themeColors.surface },
+					]}
+				>
+					<View style={styles.qrWrapper}>
+						{qrData ? (
+							<View style={styles.qrCodeContainer}>
+								<QRCode
+									value={qrData}
+									size={280}
+									backgroundColor="white"
+									color={themeColors.text}
+									logoSize={40}
+									logoBackgroundColor="white"
+									logoMargin={4}
+								/>
+							</View>
+						) : (
+							<View style={styles.qrPlaceholder}>
+								<AppIcon
+									name="loader"
+									provider="Feather"
+									size={32}
+									color={themeColors.primary}
+								/>
+								<Text
+									style={[
+										styles.qrPlaceholderText,
+										{ color: themeColors.textMuted },
+									]}
+								>
+									Génération du QR Code…
+								</Text>
+							</View>
+						)}
+					</View>
+					<View style={styles.qrInfoContainer}>
+						<Text
+							style={[
+								styles.qrInfo,
+								{ color: themeColors.textMuted },
+							]}
+						>
+							Nos produits n'attendent que vous.
+						</Text>
+					</View>
+
+					{qrData && (
+						<TouchableOpacity
+							style={[
+								styles.shareButton,
+								{ backgroundColor: themeColors.primary },
+							]}
+							onPress={() => {
+								Share.share({
+									message: `Voici mon QR Code personnalisé pour les bornes Vaseline ! 
+								
+Données: ${qrData}`,
+									title: "Mon QR Code Vaseline",
+								})
+							}}
+						>
 							<AppIcon
-								name="loader"
+								name="share"
 								provider="Feather"
-								size={32}
-								color={themeColors.primary}
+								size={20}
+								color="white"
 							/>
 							<Text
 								style={[
-									styles.qrPlaceholderText,
-									{ color: themeColors.textMuted },
+									styles.shareButtonText,
+									{ color: "white" },
 								]}
 							>
-								Génération du QR Code…
+								Partager
 							</Text>
-						</View>
+						</TouchableOpacity>
 					)}
 				</View>
-				<Text style={[styles.qrInfo, { color: themeColors.textMuted }]}>
-					Ce QR Code encode simplement vos choix et produits. 
-				</Text>
 			</View>
 		</SafeAreaView>
 	)
@@ -76,6 +135,12 @@ export default function QRCodeScreen({ route, navigation }) {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
+	},
+	centeredContainer: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		paddingHorizontal: spacing.lg,
 	},
 	container: {
 		flex: 1,
@@ -94,17 +159,23 @@ const styles = StyleSheet.create({
 	},
 	qrCard: {
 		borderRadius: radius.lg,
-		padding: spacing.lg,
-        alignSelf: "center",
-		marginBottom: spacing.xxl,
+		padding: spacing.xl,
 		alignItems: "center",
+		width: "100%",
+		maxWidth: 400,
 		...shadow.soft,
 	},
 	qrWrapper: {
-        display: "flex",
 		alignItems: "center",
 		justifyContent: "center",
-		minHeight: 500,
+		paddingVertical: spacing.lg,
+	},
+	qrCodeContainer: {
+		backgroundColor: "white",
+		borderRadius: radius.md,
+		padding: spacing.lg,
+		marginBottom: spacing.md,
+		...shadow.soft,
 	},
 	qrPlaceholder: {
 		alignItems: "center",
@@ -114,9 +185,19 @@ const styles = StyleSheet.create({
 		marginTop: spacing.sm,
 		color: colors.textMuted,
 	},
+	qrInfoContainer: {
+		alignItems: "center",
+		justifyContent: "center",
+		marginTop: spacing.lg,
+		paddingHorizontal: spacing.xl,
+		width: "100%",
+	},
 	qrInfo: {
-		fontSize: 12,
-		bottom: 80,
+		...typography.body,
+		textAlign: "center",
+		lineHeight: 20,
+		fontWeight: "300",
+		width: "100%",
 	},
 	section: { marginBottom: spacing.xl },
 	sectionTitle: {
@@ -139,4 +220,20 @@ const styles = StyleSheet.create({
 		gap: spacing.sm,
 	},
 	cta: { marginTop: spacing.lg, marginBottom: spacing.lg },
+	shareButton: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "center",
+		paddingVertical: spacing.md,
+		paddingHorizontal: spacing.xl,
+		borderRadius: radius.md,
+		marginTop: spacing.xl,
+		width: "100%",
+		gap: spacing.sm,
+	},
+	shareButtonText: {
+		...typography.body,
+		fontWeight: "600",
+		textAlign: "center",
+	},
 })

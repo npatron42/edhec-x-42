@@ -400,7 +400,11 @@ export default function RefillMapScreen({ route, navigation }) {
 	return (
 		<SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
 			<View style={styles.container}>
-				<Header headerTitle="Bornes de rechargement" headerSubtitle="Localiser les bornes et les produits disponibles" navigation={navigation} />
+				<Header
+					headerTitle="Bornes de rechargement"
+					headerSubtitle="Localiser les bornes et les produits disponibles"
+					navigation={navigation}
+				/>
 				<View style={styles.mapWrapper}>
 					{loading ? (
 						<View style={styles.loader}>
@@ -537,7 +541,7 @@ const getStyles = (c) =>
 			paddingBottom: spacing.lg,
 		},
 		mapWrapper: {
-			height: '80%',
+			height: "80%",
 			top: -30,
 			marginHorizontal: spacing.xl,
 			borderRadius: radius.xxl,

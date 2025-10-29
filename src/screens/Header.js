@@ -1,4 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+	Dimensions,
+} from "react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import { spacing, typography } from "../styles/theme"
 import { AppIcon } from "../components/common"
@@ -7,6 +13,8 @@ import { useTheme } from "../styles/ThemeProvider"
 export default function Header({ headerTitle, headerSubtitle, navigation }) {
 	const { colors } = useTheme()
 	const styles = getStyles(colors)
+	const screenHeight = Dimensions.get("screen").height
+	const headerHeight = screenHeight / 6
 	return (
 		<LinearGradient
 			colors={[colors.primary, colors.accent]}
@@ -15,26 +23,7 @@ export default function Header({ headerTitle, headerSubtitle, navigation }) {
 			style={styles.heroBanner}
 		>
 			<View style={styles.heroHeaderRow}>
-				<TouchableOpacity
-					onPress={() => navigation.goBack()}
-					accessibilityRole="button"
-					accessibilityLabel="Retour"
-				>
-					<AppIcon
-						name="arrow-back"
-						provider="Ionicons"
-						size={20}
-						color={colors.onPrimaryText}
-						style={{ marginTop: 54 }}
-					/>
-				</TouchableOpacity>
-				<View
-					style={{
-						marginLeft: spacing.sm,
-						marginTop: 54,
-						marginLeft: 14,
-					}}
-				>
+				<View style={styles.headerContent}>
 					<Text
 						style={[
 							styles.heroTitle,
@@ -57,16 +46,52 @@ export default function Header({ headerTitle, headerSubtitle, navigation }) {
 	)
 }
 
-const getStyles = (colors) =>
-	StyleSheet.create({
+const getStyles = (colors) => {
+	const screenHeight = Dimensions.get("screen").height
+	const headerHeight = screenHeight / 5
+	return StyleSheet.create({
 		heroBanner: {
-			top: -60,
-			height: 140,
-			paddingVertical: spacing.md,
-			paddingHorizontal: spacing.xl,
-			backgroundColor: colors.primary,
+			position: "absolute",
+			top: 0,
+			left: 0,
+			right: 0,
+			height: headerHeight,
+			backgroundColor: "#212F59",
+			borderBottomLeftRadius: 40,
+			borderBottomRightRadius: 40,
+			zIndex: 1000,
 		},
-		heroHeaderRow: { flexDirection: "row", alignItems: "center" },
-		heroTitle: { fontSize: 18, fontWeight: "700" },
-		heroSubtitle: { ...typography.bodySmall },
+		heroHeaderRow: {
+			position: "absolute",
+			top: 54,
+			left: 0,
+			right: 0,
+			alignItems: "center",
+			justifyContent: "center",
+			paddingHorizontal: spacing.xl,
+		},
+		headerContent: {
+			paddingTop: spacing.xl,
+			alignItems: "center",
+			justifyContent: "center",
+			width: "100%",
+		},
+		heroTitle: {
+			...typography.h4,
+			color: "white",
+			fontWeight: "700",
+			textAlign: "center",
+			marginBottom: spacing.xs,
+			width: "100%",
+		},
+		heroSubtitle: {
+			...typography.body,
+			color: "white",
+			textAlign: "center",
+			fontWeight: "300",
+			opacity: 0.9,
+			width: "100%",
+			lineHeight: 20,
+		},
 	})
+}

@@ -17,6 +17,7 @@
     "expo": "~54.0.17",
     "expo-blur": "~13.0.2",
     "expo-camera": "~17.0.8",
+    "expo-crypto": "^15.0.7",
     "expo-device": "~8.0.9",
     "expo-gl": "~16.0.7",
     "expo-image-picker": "~17.0.8",

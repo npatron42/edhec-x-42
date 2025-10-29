@@ -22,6 +22,7 @@ export default function ProductsScreen({ navigation }) {
 				{ backgroundColor: themeColors.background },
 			]}
 		>
+		<ScrollView></ScrollView>
 			<Header
 				headerTitle="Catalogue produits"
 				headerSubtitle="Découvrez les formules Dove adaptées à votre profil"

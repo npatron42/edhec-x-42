@@ -9,9 +9,13 @@
 // # from Indigen Solutions.
 
 import React, { useState, useEffect } from "react"
-import { View, Text, StyleSheet, Dimensions } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import { LinearGradient } from "expo-linear-gradient"
+import {
+	View,
+	StyleSheet,
+	Dimensions,
+	Image,
+} from "react-native"
+
 import {
 	getImpactStats,
 	getRefillHistory,
@@ -27,7 +31,6 @@ import {
 	typography,
 } from "../styles/theme.js"
 
-import { AppButton } from "../components/common/index.js"
 import { useTheme } from "../styles/ThemeProvider.js"
 
 import DahsboardHeader from "../components/dahsboard/DahsboardHeader.js"
@@ -41,6 +44,7 @@ export default function DashboardScreen({ navigation }) {
 	const [userProfile, setUserProfile] = useState(null)
 	const [profile, setProfile] = useState(null)
 	const [refreshing, setRefreshing] = useState(false)
+	const [savingWeather, setSavingWeather] = useState(false)
 
 	const loadData = async () => {
 		const [impactStats, refillHistory, answers, products, profileData] =
@@ -75,8 +79,15 @@ export default function DashboardScreen({ navigation }) {
 	return (
 		<View style={[styles.container, { backgroundColor: "#e9ecef" }]}>
 			<DahsboardHeader navigation={navigation} />
-			<View style={[styles.content, { paddingTop: headerHeight  }]}>
+			<View style={[styles.content, { paddingTop: headerHeight }]}>
 				<DashboardGrid />
+				<View style={styles.imageContainer}>
+					<Image
+						source={require("../../assets/refill-image4.png")}
+						style={styles.refillStationImage}
+						resizeMode="contain"
+					/>
+				</View>
 			</View>
 		</View>
 	)
@@ -212,4 +223,42 @@ const styles = StyleSheet.create({
 	},
 	encouragementTitle: { ...typography.h4, marginBottom: spacing.xs },
 	encouragementText: { ...typography.body },
+	weatherButtonContainer: {
+		paddingHorizontal: spacing.xl,
+		paddingVertical: spacing.lg,
+	},
+	weatherButton: {
+		backgroundColor: "#007bff",
+		paddingVertical: spacing.md,
+		paddingHorizontal: spacing.xl,
+		borderRadius: radius.lg,
+		alignItems: "center",
+		justifyContent: "center",
+		...shadow.card,
+	},
+	weatherButtonDisabled: {
+		backgroundColor: "#6c757d",
+		opacity: 0.6,
+	},
+	weatherButtonText: {
+		color: "white",
+		fontSize: 16,
+		fontWeight: "600",
+	},
+	imageContainer: {
+		position: "fixed",
+		bottom: 0,
+		left: 0,
+		right: 0,
+		zIndex: 1000,
+		width: "100%",
+		alignItems: "center",
+		justifyContent: "center",
+		paddingHorizontal: spacing.xl,
+	},
+	refillStationImage: {
+		width: "100%",
+		height: 250,
+		borderRadius: 60,
+	},
 })
