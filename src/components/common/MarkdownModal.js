@@ -9,7 +9,7 @@ import {
 	Platform,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { AppIcon } from "./index"
+import AppIcon from "./AppIcon"
 import { spacing, radius, shadow, typography } from "../../styles/theme"
 import { useTheme } from "../../styles/ThemeProvider"
 
