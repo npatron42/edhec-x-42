@@ -8,6 +8,7 @@ import {
 	Modal,
 	FlatList,
 	TouchableOpacity,
+	Dimensions,
 } from "react-native"
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
 import * as Location from "expo-location"
@@ -18,6 +19,7 @@ import { doveProducts } from "../data/products"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useTheme } from "../styles/ThemeProvider"
 import Header from "./Header"
+import { MOCK_STATIONS } from "../data/stations"
 
 // EDHEC Business School Nice coordinates (mise à jour)
 const EDHEC_NICE_COORDS = { latitude: 43.669632, longitude: 7.221006 }
@@ -39,166 +41,19 @@ const isLikelySanFrancisco = (coords) =>
 	coords.longitude >= SF_BOUNDS.lonMin &&
 	coords.longitude <= SF_BOUNDS.lonMax
 
-// Bornes de recharge dans les supermarchés de Nice
-const MOCK_STATIONS = [
-	{
-		id: "S1",
-		name: "Borne Eco-Refill - Place Masséna",
-		coords: { latitude: 43.6978, longitude: 7.2711 },
-	},
-	{
-		id: "S2",
-		name: "Borne Eco-Refill - Gare Nice-Ville",
-		coords: { latitude: 43.7049, longitude: 7.2619 },
-	},
-	{
-		id: "S3",
-		name: "Borne Eco-Refill - Nice Étoile",
-		coords: { latitude: 43.7036, longitude: 7.2674 },
-	},
-	{
-		id: "S4",
-		name: "Borne Eco-Refill - Université",
-		coords: { latitude: 43.7212, longitude: 7.2778 },
-	},
-	{
-		id: "S5",
-		name: "Borne Eco-Refill - Promenade des Anglais",
-		coords: { latitude: 43.6951, longitude: 7.2687 },
-	},
-	{
-		id: "S20",
-		name: "Casino - Cimiez",
-		coords: { latitude: 43.7189, longitude: 7.2701 },
-		type: "Casino",
-	},
-	{
-		id: "S21",
-		name: "Lidl - Riquier",
-		coords: { latitude: 43.7098, longitude: 7.2912 },
-		type: "Lidl",
-	},
-	{
-		id: "S22",
-		name: "Aldi - Nice Nord",
-		coords: { latitude: 43.7311, longitude: 7.261 },
-		type: "Aldi",
-	},
-	{
-		id: "S23",
-		name: "U Express - Vieux Nice",
-		coords: { latitude: 43.6958, longitude: 7.2744 },
-		type: "U Express",
-	},
-	{
-		id: "S24",
-		name: "Monop' - Garibaldi",
-		coords: { latitude: 43.7008, longitude: 7.2814 },
-		type: "Monop'",
-	},
-	{
-		id: "S25",
-		name: "Carrefour Market - Magnan",
-		coords: { latitude: 43.6905, longitude: 7.2405 },
-		type: "Carrefour Market",
-	},
-	{
-		id: "S26",
-		name: "Intermarché Express - République",
-		coords: { latitude: 43.7027, longitude: 7.278 },
-		type: "Intermarché Express",
-	},
-	{
-		id: "S27",
-		name: "Biocoop - Nice Centre",
-		coords: { latitude: 43.7019, longitude: 7.2655 },
-		type: "Biocoop",
-	},
-	{
-		id: "S28",
-		name: "Grand Frais - Saint-Isidore",
-		coords: { latitude: 43.7044, longitude: 7.199 },
-		type: "Grand Frais",
-	},
-	{
-		id: "S29",
-		name: "Leclerc Drive - Saint-Isidore",
-		coords: { latitude: 43.7065, longitude: 7.197 },
-		type: "Leclerc Drive",
-	},
-	{
-		id: "S30",
-		name: "Auchan - Saint-Roch",
-		coords: { latitude: 43.7109, longitude: 7.29 },
-		type: "Auchan",
-	},
-	{
-		id: "S31",
-		name: "Carrefour City - Libération",
-		coords: { latitude: 43.7145, longitude: 7.2617 },
-		type: "Carrefour City",
-	},
-	{
-		id: "S32",
-		name: "Casino Shop - Gambetta",
-		coords: { latitude: 43.7002, longitude: 7.2562 },
-		type: "Casino Shop",
-	},
-	{
-		id: "S33",
-		name: "Intermarché - La Trinité",
-		coords: { latitude: 43.7391, longitude: 7.312 },
-		type: "Intermarché",
-	},
-	{
-		id: "S34",
-		name: "U Express - Gorbella",
-		coords: { latitude: 43.7218, longitude: 7.2648 },
-		type: "U Express",
-	},
-	{
-		id: "S35",
-		name: "Monoprix - Nice Ouest",
-		coords: { latitude: 43.675, longitude: 7.217 },
-		type: "Monoprix",
-	},
-	{
-		id: "S36",
-		name: "Carrefour City - Valrose",
-		coords: { latitude: 43.714, longitude: 7.2629 },
-		type: "Carrefour City",
-	},
-	{
-		id: "S37",
-		name: "Lidl - L'Ariane",
-		coords: { latitude: 43.733, longitude: 7.31 },
-		type: "Lidl",
-	},
-	{
-		id: "S38",
-		name: "Casino - Mantega",
-		coords: { latitude: 43.703, longitude: 7.252 },
-		type: "Casino",
-	},
-	{
-		id: "S39",
-		name: "Franprix - Acropolis",
-		coords: { latitude: 43.704, longitude: 7.282 },
-		type: "Franprix",
-	},
-	{
-		id: "S40",
-		name: "Monoprix - Nice Riquier",
-		coords: { latitude: 43.7105, longitude: 7.2892 },
-		type: "Monoprix",
-	},
-]
-
 export default function RefillMapScreen({ route, navigation }) {
 	const { colors } = useTheme()
 	const styles = getStyles(colors)
 
 	const selectedProducts = route?.params?.selectedProducts || []
+	const selectedStation = route?.params?.selectedStation
+	const shouldOpenStation = route?.params?.openStation || false
+	const screenHeight = Dimensions.get("screen").height
+	const headerHeight = screenHeight / 4
+	const footerHeight = 80
+	const headerSpacer = Math.max(headerHeight - spacing.xl, spacing.lg)
+	const contentBottomInset = footerHeight + spacing.xl
+	const mapHeight = Math.min(screenHeight * 0.55, 520)
 	const [location, setLocation] = useState(null)
 	const [region, setRegion] = useState(null)
 	const [loading, setLoading] = useState(true)
@@ -294,6 +149,27 @@ export default function RefillMapScreen({ route, navigation }) {
 		setActiveStation(null)
 		setStationInventory([])
 	}
+
+	useEffect(() => {
+		if (selectedStation && shouldOpenStation) {
+			setTimeout(() => {
+				const stationCoords = selectedStation.coords
+				const newRegion = {
+					latitude: stationCoords.latitude,
+					longitude: stationCoords.longitude,
+					latitudeDelta: 0.05,
+					longitudeDelta: 0.05,
+				}
+
+				setRegion(newRegion)
+				mapRef.current?.animateToRegion(newRegion, 1000)
+
+				setTimeout(() => {
+					handleOpenStation(selectedStation)
+				}, 1200)
+			}, 500)
+		}
+	}, [selectedStation, shouldOpenStation])
 
 	useEffect(() => {
 		let isMounted = true
@@ -398,85 +274,99 @@ export default function RefillMapScreen({ route, navigation }) {
 	const openQRCode = () => navigation.navigate("QRCode", { selectedProducts })
 
 	return (
-		<SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-			<View style={styles.container}>
-				<Header
-					headerTitle="Bornes de rechargement"
-					headerSubtitle="Localiser les bornes et les produits disponibles"
-					navigation={navigation}
-				/>
-				<View style={styles.centeredContainer}>
-					<View style={styles.mapWrapper}>
-						{loading ? (
-							<View style={styles.loader}>
-								<ActivityIndicator color={colors.primary} />
-								<Text style={styles.loaderText}>
-									Localisation en cours…
-								</Text>
-							</View>
-						) : (
-							<MapView
-								ref={mapRef}
-								style={styles.map}
-								provider={PROVIDER_GOOGLE}
-								initialRegion={
-									region || {
-										...DEFAULT_COORDS,
-										latitudeDelta: 0.08,
-										longitudeDelta: 0.08,
-									}
-								}
-								onRegionChangeComplete={setRegion}
-								showsUserLocation={!!location}
-								followsUserLocation={false}
-								showsMyLocationButton={false}
-							>
-								{MOCK_STATIONS.map((station) => (
-									<Marker
-										key={station.id}
-										coordinate={station.coords}
-										title={station.name}
-										description={`Type: ${
-											station.type || "Supermarché"
-										}`}
-										pinColor={colors.primary}
-										onPress={() =>
-											handleOpenStation(station)
+		<View style={styles.container}>
+			<Header
+				headerTitle="Bornes de rechargement"
+				headerSubtitle="Localiser les bornes autour de vous!"
+				navigation={navigation}
+			/>
+			<SafeAreaView style={styles.safeArea} edges={["bottom"]}>
+				<View
+					style={[
+						styles.content,
+						{
+							paddingTop: headerSpacer,
+							paddingBottom: contentBottomInset,
+						},
+					]}
+				>
+					<View style={styles.mapContainer}>
+						<View
+							style={[styles.mapWrapper, { height: mapHeight }]}
+						>
+							{loading ? (
+								<View style={styles.loader}>
+									<ActivityIndicator color={colors.primary} />
+									<Text style={styles.loaderText}>
+										Localisation en cours…
+									</Text>
+								</View>
+							) : (
+								<MapView
+									ref={mapRef}
+									style={styles.map}
+									provider={PROVIDER_GOOGLE}
+									initialRegion={
+										region || {
+											...DEFAULT_COORDS,
+											latitudeDelta: 0.08,
+											longitudeDelta: 0.08,
 										}
-									/>
-								))}
-							</MapView>
-						)}
-
-						{/* Bouton personnalisé de localisation */}
-						{!loading ? (
-							<View style={styles.locateFab}>
-								<TouchableOpacity
-									style={styles.locateButton}
-									onPress={recenterToUser}
-									accessibilityLabel="Me localiser"
+									}
+									onRegionChangeComplete={setRegion}
+									showsUserLocation={!!location}
+									followsUserLocation={false}
+									showsMyLocationButton={false}
 								>
-									<AppIcon
-										name="crosshairs-gps"
-										provider="MaterialCommunityIcons"
-										size={22}
-										color={colors.background}
-									/>
-								</TouchableOpacity>
-							</View>
-						) : null}
-					</View>
-				</View>
+									{MOCK_STATIONS.map((station) => (
+										<Marker
+											key={station.id}
+											coordinate={station.coords}
+											title={station.name}
+											description={`Type: ${
+												station.type || "Supermarché"
+											}`}
+											pinColor={colors.primary}
+											onPress={() =>
+												handleOpenStation(station)
+											}
+										/>
+									))}
+								</MapView>
+							)}
 
-				{Platform.OS === "web" ? (
-					<View style={styles.webHelp}>
-						<Text style={styles.webHelpText}>
-							Si la carte ne s'affiche pas, vérifiez les
-							permissions de localisation du navigateur.
-						</Text>
+							{/* Bouton personnalisé de localisation */}
+							{!loading ? (
+								<View style={styles.locateFab}>
+									<TouchableOpacity
+										style={styles.locateButton}
+										onPress={recenterToUser}
+										accessibilityLabel="Me localiser"
+									>
+										<AppIcon
+											name="crosshairs-gps"
+											provider="MaterialCommunityIcons"
+											size={22}
+											color={colors.background}
+										/>
+									</TouchableOpacity>
+								</View>
+							) : null}
+						</View>
 					</View>
-				) : null}
-				{error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+					{Platform.OS === "web" ? (
+						<View style={styles.webHelp}>
+							<Text style={styles.webHelpText}>
+								Si la carte ne s'affiche pas, vérifiez les
+								permissions de localisation du navigateur.
+							</Text>
+						</View>
+					) : null}
+					{error ? (
+						<Text style={styles.errorText}>{error}</Text>
+					) : null}
+				</View>
 				<Modal
 					visible={stationModalVisible}
 					transparent
@@ -528,30 +418,35 @@ export default function RefillMapScreen({ route, navigation }) {
 						</View>
 					</View>
 				</Modal>
-			</View>
-		</SafeAreaView>
+			</SafeAreaView>
+		</View>
 	)
 }
 
 const getStyles = (c) =>
 	StyleSheet.create({
-		safeArea: {
-			flex: 1,
-			backgroundColor: c.background,
-		},
 		container: {
 			flex: 1,
 			backgroundColor: c.background,
 		},
-		centeredContainer: {
+		safeArea: {
 			flex: 1,
-			justifyContent: "center",
+			backgroundColor: c.background,
+		},
+		content: {
+			flex: 1,
+			paddingHorizontal: spacing.xl,
+			gap: spacing.lg,
+		},
+		mapContainer: {
+			flexGrow: 1,
 			alignItems: "center",
-			paddingHorizontal: spacing.lg,
+			justifyContent: "center",
 		},
 		mapWrapper: {
 			width: "100%",
-			height: "80%",
+			maxWidth: 620,
+			alignSelf: "stretch",
 			borderRadius: radius.xxl,
 			borderWidth: 3,
 			borderColor: c.primaryBorder,
@@ -570,16 +465,10 @@ const getStyles = (c) =>
 			marginTop: spacing.sm,
 			color: c.textMuted,
 		},
-		footer: {
-			paddingHorizontal: spacing.xl,
-			paddingBottom: spacing.xxl,
-		},
 		webHelp: {
 			padding: spacing.md,
-			marginHorizontal: spacing.lg,
 			backgroundColor: c.surface,
 			borderRadius: radius.md,
-			marginBottom: spacing.md,
 		},
 		webHelpText: {
 			...typography.bodySmall,
@@ -591,7 +480,6 @@ const getStyles = (c) =>
 			color: c.error,
 			textAlign: "center",
 			padding: spacing.md,
-			marginHorizontal: spacing.lg,
 		},
 		modalBackdrop: {
 			flex: 1,

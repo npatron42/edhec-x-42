@@ -9,12 +9,7 @@
 // # from Indigen Solutions.
 
 import React, { useState, useEffect } from "react"
-import {
-	View,
-	StyleSheet,
-	Dimensions,
-	Image,
-} from "react-native"
+import { View, StyleSheet, Dimensions, Image } from "react-native"
 
 import {
 	getImpactStats,
@@ -247,6 +242,7 @@ const styles = StyleSheet.create({
 	},
 	imageContainer: {
 		position: "fixed",
+		top: 10,
 		bottom: 0,
 		left: 0,
 		right: 0,

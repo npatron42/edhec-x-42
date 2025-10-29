@@ -40,25 +40,27 @@ export default function DahsboardHeader() {
 		loadUserProfile()
 	}, [])
 	return (
-		<LinearGradient
-			colors={[colors.primary, colors.accent]}
-			start={{ x: 0, y: 0 }}
-			end={{ x: 1, y: 1 }}
-			style={styles.heroBanner}
-		>
-			<View style={styles.titleContainer}>
-				<Text style={styles.greeting}>
-					Bonjour, {userProfile?.name}!
-				</Text>
-				<View style={styles.locationContainer}>
-					<Text style={styles.location}>Nice, 06100</Text>
-					<SvgXml xml={locationSvg} width={24} height={24} />
+		<View style={styles.container}>
+			<LinearGradient
+				colors={[colors.primary, colors.accent]}
+				start={{ x: 0, y: 0 }}
+				end={{ x: 1, y: 1 }}
+				style={styles.heroBanner}
+			>
+				<View style={styles.titleContainer}>
+					<Text style={styles.greeting}>
+						Bonjour, {userProfile?.name}!
+					</Text>
+					<View style={styles.locationContainer}>
+						<Text style={styles.location}>Nice, 06100</Text>
+						<SvgXml xml={locationSvg} width={24} height={24} />
+					</View>
 				</View>
-			</View>
-			<View style={styles.searchContainer}>
-				<DashboardHeaderSearch />
-			</View>
-		</LinearGradient>
+				<View style={styles.searchContainer}>
+					<DashboardHeaderSearch />
+				</View>
+			</LinearGradient>
+		</View>
 	)
 }
 
@@ -67,6 +69,10 @@ const getStyles = (colors, insets) => {
 	const headerHeight = screenHeight / 3.8
 
 	return StyleSheet.create({
+		container: {
+			position: "relative",
+			zIndex: 1,
+		},
 		heroBanner: {
 			position: "absolute",
 			top: 0,
@@ -76,7 +82,8 @@ const getStyles = (colors, insets) => {
 			backgroundColor: "#212F59",
 			borderBottomLeftRadius: 40,
 			borderBottomRightRadius: 40,
-			zIndex: 1000,
+			zIndex: 1,
+			overflow: "visible",
 		},
 		titleContainer: {
 			position: "absolute",

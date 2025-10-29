@@ -12,9 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import QRCode from "react-native-qrcode-svg"
 import { AppIcon } from "../components/common"
 import { generateQRData, calculateImpact } from "../utils/recommendations"
-import { addRefillToHistory } from "../utils/storage"
 import { colors, spacing, radius, shadow, typography } from "../styles/theme"
+
 import { useTheme } from "../styles/ThemeProvider"
+
 import Header from "./Header"
 
 export default function QRCodeScreen({ route, navigation }) {

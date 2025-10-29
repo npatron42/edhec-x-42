@@ -3,9 +3,12 @@ import {
   NavigationContainer,
   createNavigationContainerRef,
 } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from "@react-navigation/stack";
 import { StatusBar } from "expo-status-bar";
-import { Platform } from "react-native";
+import { Platform, Easing } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import FooterNavigation from "./src/components/FooterNavigation";
@@ -31,6 +34,72 @@ const CameraCaptureScreen = Platform.select({
   web: require("./src/screens/CameraCaptureScreen.web").default,
   default: require("./src/screens/CameraCaptureScreen").default,
 });
+
+const FOOTER_ROUTES = ["Dashboard", "QRCode", "RefillMap", "Profile"];
+
+const transitionOpenSpec = {
+  animation: "timing",
+  config: {
+    duration: 260,
+    easing: Easing.out(Easing.cubic),
+  },
+};
+
+const transitionCloseSpec = {
+  animation: "timing",
+  config: {
+    duration: 220,
+    easing: Easing.out(Easing.cubic),
+  },
+};
+
+const createDirectionalInterpolator = (direction) => ({
+  current,
+  layouts,
+}) => {
+  const width = layouts.screen.width;
+  const translateX = current.progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: direction === "right" ? [width, 0] : [-width, 0],
+  });
+
+  const overlayOpacity = current.progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.05],
+  });
+
+  return {
+    cardStyle: {
+      transform: [{ translateX }],
+    },
+    overlayStyle: {
+      opacity: overlayOpacity,
+    },
+  };
+};
+
+const stackScreenOptions = ({ route }) => {
+  const direction = route.params?.transitionDirection;
+  if (direction && FOOTER_ROUTES.includes(route.name)) {
+    return {
+      headerShown: false,
+      gestureEnabled: true,
+      gestureDirection: "horizontal",
+      cardStyleInterpolator: createDirectionalInterpolator(direction),
+      transitionSpec: {
+        open: transitionOpenSpec,
+        close: transitionCloseSpec,
+      },
+    };
+  }
+
+  return {
+    headerShown: false,
+    gestureEnabled: true,
+    gestureDirection: "horizontal",
+    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+  };
+};
 
 function AppInner() {
   const [currentRoute, setCurrentRoute] = useState("Dashboard");
@@ -85,11 +154,7 @@ function AppInner() {
       >
         <StatusBar style={isDark ? "light" : "dark"} />
         <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            gestureEnabled: true,
-            gestureDirection: "horizontal",
-          }}
+          screenOptions={stackScreenOptions}
           initialRouteName="Dashboard"
         >
           <Stack.Screen name="Auth" component={AuthScreen} />
