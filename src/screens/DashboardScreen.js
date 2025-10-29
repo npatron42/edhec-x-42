@@ -9,7 +9,13 @@
 // # from Indigen Solutions.
 
 import React, { useState, useEffect } from "react"
-import { View, StyleSheet, Dimensions, Image } from "react-native"
+import {
+	View,
+	StyleSheet,
+	Dimensions,
+	Image,
+	TouchableOpacity,
+} from "react-native"
 
 import {
 	getImpactStats,
@@ -30,6 +36,7 @@ import { useTheme } from "../styles/ThemeProvider.js"
 
 import DahsboardHeader from "../components/dahsboard/DahsboardHeader.js"
 import DashboardGrid from "../components/dahsboard/DashboardGrid.js"
+import { BottomSheetModal } from "../components/common/index.js"
 
 export default function DashboardScreen({ navigation }) {
 	const { isDark, colors } = useTheme()
@@ -40,6 +47,26 @@ export default function DashboardScreen({ navigation }) {
 	const [profile, setProfile] = useState(null)
 	const [refreshing, setRefreshing] = useState(false)
 	const [savingWeather, setSavingWeather] = useState(false)
+	const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false)
+
+	const wysiwygContent = `# Bienvenue dans notre réseau de recharge
+
+## Découvrez nos stations de recharge
+
+Notre réseau de **stations de recharge** vous permet de recharger vos produits cosmétiques et d'hygiène de manière écologique et économique.
+
+- Réduisez votre impact environnemental
+- Économisez jusqu'à 30% sur vos produits
+- Contribuez à un monde plus durable
+
+### Comment ça marche ?
+
+1. Trouvez une station près de chez vous
+2. Apportez vos contenants vides
+3. Rechargez vos produits préférés
+4. Partez avec des produits frais !
+
+Rejoignez notre communauté et faites partie du changement ! 🌱`
 
 	const loadData = async () => {
 		const [impactStats, refillHistory, answers, products, profileData] =
@@ -75,7 +102,7 @@ export default function DashboardScreen({ navigation }) {
 		<View style={[styles.container, { backgroundColor: "#e9ecef" }]}>
 			<DahsboardHeader navigation={navigation} />
 			<View style={[styles.content, { paddingTop: headerHeight }]}>
-				<DashboardGrid />
+				<DashboardGrid navigation={navigation} />
 				<View style={styles.imageContainer}>
 					<Image
 						source={require("../../assets/refill-image4.png")}

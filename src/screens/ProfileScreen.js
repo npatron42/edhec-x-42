@@ -162,77 +162,6 @@ export default function ProfileScreen({ navigation }) {
 			>
 				<View style={styles.card}>
 					<View style={styles.sectionHeader}>
-						<AntDesign
-							name="user"
-							size={24}
-							color={themeColors.primary}
-						/>
-						<Text style={styles.sectionTitle}>Informations</Text>
-					</View>
-					<View style={styles.formGroup}>
-						<Text style={styles.label}>Nom</Text>
-						<TextInput
-							value={name}
-							onChangeText={setName}
-							placeholder="Votre nom"
-							style={styles.input}
-							placeholderTextColor={themeColors.textMuted}
-						/>
-					</View>
-					<View style={styles.formGroup}>
-						<Text style={styles.label}>Email</Text>
-						<TextInput
-							value={email}
-							onChangeText={setEmail}
-							placeholder="vous@exemple.com"
-							autoCapitalize="none"
-							keyboardType="email-address"
-							style={styles.input}
-							placeholderTextColor={themeColors.textMuted}
-						/>
-					</View>
-					<AppButton
-						label={saving ? "Enregistrement…" : "Enregistrer"}
-						icon={{ name: "save-outline", provider: "Ionicons" }}
-						onPress={handleSave}
-						disabled={saving}
-					/>
-				</View>
-
-				<View style={styles.card}>
-					<View style={styles.sectionHeader}>
-						<MaterialIcons
-							name="palette"
-							size={24}
-							color={themeColors.primary}
-						/>
-						<Text style={styles.sectionTitle}>Apparence</Text>
-					</View>
-					<Text style={styles.sectionSubtitle}>
-						Choisissez votre thème
-					</Text>
-					<View style={styles.themeRow}>
-						<ThemeOption
-							value="light"
-							label="Clair"
-							icon={{
-								name: "sunny-outline",
-								provider: "Ionicons",
-							}}
-						/>
-						<ThemeOption
-							value="dark"
-							label="Sombre"
-							icon={{
-								name: "moon-outline",
-								provider: "Ionicons",
-							}}
-						/>
-					</View>
-				</View>
-
-				<View style={styles.card}>
-					<View style={styles.sectionHeader}>
 						<FontAwesome5
 							name="award"
 							size={22}
@@ -310,7 +239,76 @@ export default function ProfileScreen({ navigation }) {
 						</View>
 					) : null}
 				</View>
+				<View style={styles.card}>
+					<View style={styles.sectionHeader}>
+						<MaterialIcons
+							name="palette"
+							size={24}
+							color={themeColors.primary}
+						/>
+						<Text style={styles.sectionTitle}>Apparence</Text>
+					</View>
+					<Text style={styles.sectionSubtitle}>
+						Choisissez votre thème
+					</Text>
+					<View style={styles.themeRow}>
+						<ThemeOption
+							value="light"
+							label="Clair"
+							icon={{
+								name: "sunny-outline",
+								provider: "Ionicons",
+							}}
+						/>
+						<ThemeOption
+							value="dark"
+							label="Sombre"
+							icon={{
+								name: "moon-outline",
+								provider: "Ionicons",
+							}}
+						/>
+					</View>
+				</View>
 
+				<View style={styles.card}>
+					<View style={styles.sectionHeader}>
+						<AntDesign
+							name="user"
+							size={24}
+							color={themeColors.primary}
+						/>
+						<Text style={styles.sectionTitle}>Informations</Text>
+					</View>
+					<View style={styles.formGroup}>
+						<Text style={styles.label}>Nom</Text>
+						<TextInput
+							value={name}
+							onChangeText={setName}
+							placeholder="Votre nom"
+							style={styles.input}
+							placeholderTextColor={themeColors.textMuted}
+						/>
+					</View>
+					<View style={styles.formGroup}>
+						<Text style={styles.label}>Email</Text>
+						<TextInput
+							value={email}
+							onChangeText={setEmail}
+							placeholder="vous@exemple.com"
+							autoCapitalize="none"
+							keyboardType="email-address"
+							style={styles.input}
+							placeholderTextColor={themeColors.textMuted}
+						/>
+					</View>
+					<AppButton
+						label={saving ? "Enregistrement…" : "Enregistrer"}
+						icon={{ name: "save-outline", provider: "Ionicons" }}
+						onPress={handleSave}
+						disabled={saving}
+					/>
+				</View>
 				<View style={styles.card}>
 					<Text style={styles.sectionTitle}>Session</Text>
 					<AppButton
