@@ -36,7 +36,6 @@ import { useTheme } from "../styles/ThemeProvider.js"
 
 import DahsboardHeader from "../components/dahsboard/DahsboardHeader.js"
 import DashboardGrid from "../components/dahsboard/DashboardGrid.js"
-import { BottomSheetModal } from "../components/common/index.js"
 
 export default function DashboardScreen({ navigation }) {
 	const { isDark, colors } = useTheme()
@@ -96,10 +95,11 @@ Rejoignez notre communauté et faites partie du changement ! 🌱`
 	}, [])
 
 	const screenHeight = Dimensions.get("screen").height
-	const headerHeight = screenHeight / 4
+	// Align header offset with DahsboardHeader height and add extra spacing to avoid overlap
+	const headerHeight = Math.ceil(screenHeight / 3.8) + spacing.xl
 
 	return (
-		<View style={[styles.container, { backgroundColor: "#e9ecef" }]}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<DahsboardHeader navigation={navigation} />
 			<View style={[styles.content, { paddingTop: headerHeight }]}>
 				<DashboardGrid navigation={navigation} />
@@ -268,16 +268,13 @@ const styles = StyleSheet.create({
 		fontWeight: "600",
 	},
 	imageContainer: {
-		position: "fixed",
-		top: 10,
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 1000,
+		// Removed web-only overlay that broke interactivity
+		position: "relative",
 		width: "100%",
 		alignItems: "center",
 		justifyContent: "center",
 		paddingHorizontal: spacing.xl,
+		marginTop: spacing.lg,
 	},
 	refillStationImage: {
 		width: "100%",
