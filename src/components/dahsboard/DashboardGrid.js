@@ -109,7 +109,7 @@ const EconomyIcon = ({ color = "#000000", size = 24 }) => (
 	</Svg>
 )
 
-export default function DashboardGrid() {
+export default function DashboardGrid({ navigation }) {
 	const colors = useTheme()
 	const styles = getStyles(colors)
 	const navigation = useNavigation()
@@ -142,6 +142,7 @@ export default function DashboardGrid() {
 			icon: { name: "shopping-bag", provider: "Feather" },
 			badgeColor: colors.surfaceAlt,
 			iconColor: colors.primaryDark,
+			onPress: () => navigation?.navigate("Products"),
 		},
 		{
 			key: "savings",
@@ -212,7 +213,7 @@ export default function DashboardGrid() {
 							>
 								{isSpecialCard ? (
 									<LinearGradient
-										colors={["#235A93", "#212F59"]}
+										colors={["#212F59", "#212F59"]}
 										style={styles.gradientContainer}
 									>
 										<View
