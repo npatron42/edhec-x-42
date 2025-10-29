@@ -13,88 +13,18 @@ import { colors, spacing, radius, shadow, typography } from "../styles/theme"
 import { useTheme } from "../styles/ThemeProvider"
 import Header from "./Header"
 
-const getProductName = (product) => {
-	const nameMap = {
-		"products.items.menFastAbsorbingLotion.name":
-			"Men Fast Absorbing Lotion",
-		"products.items.healingJellyCocoaButter.name":
-			"Healing Jelly Cocoa Butter",
-		"products.items.lipTherapyOriginalTin.name": "Lip Therapy Original Tin",
-		"products.items.lipTherapyAloeTin.name": "Lip Therapy Aloe Tin",
-		"products.items.lipTherapyRosyLipsTin.name":
-			"Lip Therapy Rosy Lips Tin",
-		"products.items.lipTherapyPinkBubblyTin.name":
-			"Lip Therapy Pink Bubbly Tin",
-		"products.items.lipTherapyCocoaButterTin.name":
-			"Lip Therapy Cocoa Butter Tin",
-		"products.items.healingJellyOriginal.name": "Healing Jelly Original",
-		"products.items.healingJellyBaby.name": "Healing Jelly Baby",
-		"products.items.intensiveCareDrySkinRepairLotion.name":
-			"Intensive Care Dry Skin Repair Lotion",
-		"products.items.intensiveCareAloeVeraHydrationLotion.name":
-			"Intensive Care Aloe Vera Hydration Lotion",
-		"products.items.intensiveCareCalmHealingLotion.name":
-			"Intensive Care Calm Healing Lotion",
-		"products.items.intensiveCareHydraStrengthHandCreme.name":
-			"Intensive Care Hydra Strength Hand Crème",
-		"products.items.intensiveCareHydraReplenishHandCreme.name":
-			"Intensive Care Hydra Replenish Hand Crème",
-		"products.items.proVitab3SuppleAndSoftSerumBurstLotion.name":
-			"Pro VitaB3 Supple & Soft Serum-Burst Lotion",
-		"products.items.proVitab3LuminousGlowSerumBurstLotion.name":
-			"Pro VitaB3 Luminous Glow Serum-Burst Lotion",
-		"products.items.intensiveCareHealthyHandsStrongerNailsLotion.name":
-			"Intensive Care Healthy Hands Stronger Nails Lotion",
-		"products.items.allOverBodyBalmJellyStick.name":
-			"All-Over Body Balm Jelly Stick",
-	}
-	return nameMap[product.i18n.name] || `Produit ${product.id}`
-}
-
-const getProductDescription = (product) => {
-	const descMap = {
-		"products.items.menFastAbsorbingLotion.description":
-			"Lotion à absorption rapide spécialement conçue pour les hommes",
-		"products.items.healingJellyCocoaButter.description":
-			"Baume réparateur enrichi au beurre de cacao pour une hydratation intense",
-		"products.items.lipTherapyOriginalTin.description":
-			"Baume à lèvres original pour apaiser et réparer les lèvres sèches",
-		"products.items.lipTherapyAloeTin.description":
-			"Baume à lèvres à l'aloe vera pour un effet apaisant",
-		"products.items.lipTherapyRosyLipsTin.description":
-			"Baume à lèvres teinté pour des lèvres rosées et hydratées",
-		"products.items.lipTherapyPinkBubblyTin.description":
-			"Baume à lèvres pétillant rose pour un effet frais et rafraîchissant",
-		"products.items.lipTherapyCocoaButterTin.description":
-			"Baume à lèvres au beurre de cacao pour une nutrition profonde",
-		"products.items.healingJellyOriginal.description":
-			"Baume réparateur original pour apaiser et protéger la peau",
-		"products.items.healingJellyBaby.description":
-			"Baume réparateur doux spécialement formulé pour les bébés",
-		"products.items.intensiveCareDrySkinRepairLotion.description":
-			"Lotion intensive pour réparer et hydrater les peaux très sèches",
-		"products.items.intensiveCareAloeVeraHydrationLotion.description":
-			"Lotion hydratante à l'aloe vera pour une sensation fraîche",
-		"products.items.intensiveCareCalmHealingLotion.description":
-			"Lotion apaisante pour calmer et réparer les peaux sensibles",
-		"products.items.intensiveCareHydraStrengthHandCreme.description":
-			"Crème mains intensive pour renforcer et hydrater",
-		"products.items.intensiveCareHydraReplenishHandCreme.description":
-			"Crème mains pour restaurer et nourrir la peau",
-		"products.items.proVitab3SuppleAndSoftSerumBurstLotion.description":
-			"Lotion avec sérum enrichi en vitamine B3 pour une peau souple et douce",
-		"products.items.proVitab3LuminousGlowSerumBurstLotion.description":
-			"Lotion avec sérum pour un éclat lumineux et une peau uniforme",
-		"products.items.intensiveCareHealthyHandsStrongerNailsLotion.description":
-			"Lotion mains pour renforcer les ongles et hydrater la peau",
-		"products.items.allOverBodyBalmJellyStick.description":
-			"Bâton baume multi-usages pour une hydratation nomade",
-	}
-	return descMap[product.i18n.description] || "Description non disponible"
-}
-
 export default function ProductsScreen({ navigation }) {
 	const { colors: themeColors } = useTheme()
+	const bodyProducts = vaselineProducts.filter(
+		(p) => p.category === "soin-corps",
+	)
+	const handProducts = vaselineProducts.filter(
+		(p) => p.category === "soin-mains",
+	)
+	const lipProducts = vaselineProducts.filter(
+		(p) => p.category === "soin-levres",
+	)
+
 	return (
 		<SafeAreaView
 			style={[
@@ -108,38 +38,152 @@ export default function ProductsScreen({ navigation }) {
 				navigation={navigation}
 			/>
 			<ScrollView style={styles.content}>
-				{vaselineProducts.map((p) => (
-					<View
-						key={p.id}
+				<View style={styles.section}>
+					<Text
 						style={[
-							styles.card,
-							{
-								backgroundColor: themeColors.surface,
-								borderColor: themeColors.border,
-							},
+							styles.sectionTitle,
+							{ color: themeColors.textPrimary },
 						]}
 					>
-						<Image source={p.image} style={styles.productImage} />
-						<View style={styles.productInfo}>
-							<Text
+						Soins corps
+					</Text>
+					<ScrollView
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.horizontalList}
+					>
+						{bodyProducts.map((p) => (
+							<View
+								key={`body-${p.id}`}
 								style={[
-									styles.name,
-									{ color: themeColors.textPrimary },
+									styles.hCard,
+									{
+										backgroundColor: themeColors.surface,
+										borderColor: themeColors.border,
+									},
 								]}
 							>
-								{getProductName(p)}
-							</Text>
-							<Text
+								<Image source={p.image} style={styles.hImage} />
+								<Text
+									style={[
+										styles.hName,
+										{ color: themeColors.textPrimary },
+									]}
+									numberOfLines={2}
+								>
+									{p.name}
+								</Text>
+								<Text
+									style={[
+										styles.hDesc,
+										{ color: themeColors.textSecondary },
+									]}
+									numberOfLines={2}
+								>
+									{p.description}
+								</Text>
+							</View>
+						))}
+					</ScrollView>
+				</View>
+
+				<View style={styles.section}>
+					<Text
+						style={[
+							styles.sectionTitle,
+							{ color: themeColors.textPrimary },
+						]}
+					>
+						Soins mains
+					</Text>
+					<ScrollView
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.horizontalList}
+					>
+						{handProducts.map((p) => (
+							<View
+								key={`hands-${p.id}`}
 								style={[
-									styles.desc,
-									{ color: themeColors.textSecondary },
+									styles.hCard,
+									{
+										backgroundColor: themeColors.surface,
+										borderColor: themeColors.border,
+									},
 								]}
 							>
-								{getProductDescription(p)}
-							</Text>
-						</View>
-					</View>
-				))}
+								<Image source={p.image} style={styles.hImage} />
+								<Text
+									style={[
+										styles.hName,
+										{ color: themeColors.textPrimary },
+									]}
+									numberOfLines={2}
+								>
+									{p.name}
+								</Text>
+								<Text
+									style={[
+										styles.hDesc,
+										{ color: themeColors.textSecondary },
+									]}
+									numberOfLines={2}
+								>
+									{p.description}
+								</Text>
+							</View>
+						))}
+					</ScrollView>
+				</View>
+
+				<View style={styles.section}>
+					<Text
+						style={[
+							styles.sectionTitle,
+							{ color: themeColors.textPrimary },
+						]}
+					>
+						Soins lèvres
+					</Text>
+					<ScrollView
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.horizontalList}
+					>
+						{lipProducts.map((p) => (
+							<View
+								key={`lips-${p.id}`}
+								style={[
+									styles.hCard,
+									{
+										backgroundColor: themeColors.surface,
+										borderColor: themeColors.border,
+									},
+								]}
+							>
+								<Image source={p.image} style={styles.hImage} />
+								<Text
+									style={[
+										styles.hName,
+										{ color: themeColors.textPrimary },
+									]}
+									numberOfLines={2}
+								>
+									{p.name}
+								</Text>
+								<Text
+									style={[
+										styles.hDesc,
+										{ color: themeColors.textSecondary },
+									]}
+									numberOfLines={2}
+								>
+									{p.description}
+								</Text>
+							</View>
+						))}
+					</ScrollView>
+				</View>
 			</ScrollView>
 		</SafeAreaView>
 	)
@@ -157,6 +201,17 @@ const styles = StyleSheet.create({
 		paddingHorizontal: spacing.xl,
 		paddingBottom: spacing.xxxl,
 		...(Platform.OS === "web" && { minHeight: "100vh" }),
+	},
+	section: {
+		marginTop: spacing.lg,
+		marginBottom: spacing.xl,
+	},
+	sectionTitle: {
+		...typography.h3,
+		marginBottom: spacing.md,
+	},
+	horizontalList: {
+		paddingRight: spacing.xl,
 	},
 	heroBanner: {
 		marginTop: spacing.md,
@@ -179,10 +234,27 @@ const styles = StyleSheet.create({
 		marginBottom: spacing.sm,
 		...shadow.soft,
 	},
+	hCard: {
+		width: 220,
+		borderWidth: 1,
+		borderColor: colors.border,
+		borderRadius: radius.lg,
+		padding: spacing.md,
+		marginRight: spacing.md,
+		...shadow.soft,
+	},
 	productImage: {
 		width: 80,
 		height: 80,
 		marginRight: spacing.lg,
+		resizeMode: "contain",
+		borderRadius: radius.md,
+	},
+	hImage: {
+		width: 160,
+		height: 160,
+		alignSelf: "center",
+		marginBottom: spacing.sm,
 		resizeMode: "contain",
 		borderRadius: radius.md,
 	},
@@ -195,4 +267,6 @@ const styles = StyleSheet.create({
 		color: colors.textSecondary,
 		marginTop: spacing.xs,
 	},
+	hName: { ...typography.h5, marginTop: spacing.xs },
+	hDesc: { ...typography.caption, marginTop: spacing.xs },
 })

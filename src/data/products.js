@@ -1,6 +1,7 @@
 export const vaselineProducts = [
 	{
 		id: "1",
+		name: "Lotion à absorption rapide pour hommes",
 		i18n: {
 			name: "products.items.menFastAbsorbingLotion.name",
 			description: "products.items.menFastAbsorbingLotion.description",
@@ -11,7 +12,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Lotion à absorption rapide spécialement conçue pour les hommes",
 		skinTypes: ["normal", "sec"],
 		environment: ["faible", "moyenne"],
 		benefits: [],
@@ -23,6 +25,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "2",
+		name: "Baume réparateur au beurre de cacao",
 		i18n: {
 			name: "products.items.healingJellyCocoaButter.name",
 			description: "products.items.healingJellyCocoaButter.description",
@@ -33,7 +36,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Baume réparateur enrichi au beurre de cacao pour une hydratation intense",
 		skinTypes: ["sec", "très-sec"],
 		environment: ["faible", "moyenne"],
 		benefits: [],
@@ -45,6 +49,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "3",
+		name: "Baume à lèvres original",
 		i18n: {
 			name: "products.items.lipTherapyOriginalTin.name",
 			description: "products.items.lipTherapyOriginalTin.description",
@@ -55,7 +60,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-levres",
-		description: "",
+		description:
+			"Baume à lèvres original pour apaiser et réparer les lèvres sèches",
 		skinTypes: ["sec", "sensible", "normal"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -67,6 +73,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "4",
+		name: "Baume à lèvres à l'aloe vera",
 		i18n: {
 			name: "products.items.lipTherapyAloeTin.name",
 			description: "products.items.lipTherapyAloeTin.description",
@@ -77,7 +84,7 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-levres",
-		description: "",
+		description: "Baume à lèvres à l'aloe vera pour un effet apaisant",
 		skinTypes: ["sensible", "sec", "normal"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -89,6 +96,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "5",
+		name: "Baume à lèvres teinté rosé",
 		i18n: {
 			name: "products.items.lipTherapyRosyLipsTin.name",
 			description: "products.items.lipTherapyRosyLipsTin.description",
@@ -99,7 +107,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-levres",
-		description: "",
+		description:
+			"Baume à lèvres teinté pour des lèvres rosées et hydratées",
 		skinTypes: ["normal", "sec"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -111,6 +120,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "6",
+		name: "Baume à lèvres pétillant rose",
 		i18n: {
 			name: "products.items.lipTherapyPinkBubblyTin.name",
 			description: "products.items.lipTherapyPinkBubblyTin.description",
@@ -121,7 +131,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-levres",
-		description: "",
+		description:
+			"Baume à lèvres pétillant rose pour un effet frais et rafraîchissant",
 		skinTypes: ["normal", "sec"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -133,6 +144,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "7",
+		name: "Baume à lèvres au beurre de cacao",
 		i18n: {
 			name: "products.items.lipTherapyCocoaButterTin.name",
 			description: "products.items.lipTherapyCocoaButterTin.description",
@@ -143,7 +155,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-levres",
-		description: "",
+		description:
+			"Baume à lèvres au beurre de cacao pour une nutrition profonde",
 		skinTypes: ["sec", "très-sec"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -155,6 +168,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "8",
+		name: "Baume réparateur original",
 		i18n: {
 			name: "products.items.healingJellyOriginal.name",
 			description: "products.items.healingJellyOriginal.description",
@@ -165,7 +179,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Baume réparateur original pour apaiser et protéger la peau",
 		skinTypes: ["sec", "très-sec", "sensible"],
 		environment: ["faible", "moyenne"],
 		benefits: [],
@@ -177,6 +192,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "9",
+		name: "Baume réparateur bébé",
 		i18n: {
 			name: "products.items.healingJellyBaby.name",
 			description: "products.items.healingJellyBaby.description",
@@ -187,7 +203,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Baume réparateur doux spécialement formulé pour les bébés",
 		skinTypes: ["sensible", "normal"],
 		environment: ["faible", "moyenne"],
 		benefits: [],
@@ -199,6 +216,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "10",
+		name: "Lotion intensive réparation peaux sèches",
 		i18n: {
 			name: "products.items.intensiveCareDrySkinRepairLotion.name",
 			description:
@@ -210,7 +228,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Lotion intensive pour réparer et hydrater les peaux très sèches",
 		skinTypes: ["sec", "très-sec"],
 		environment: ["faible", "moyenne"],
 		benefits: [],
@@ -222,6 +241,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "11",
+		name: "Lotion hydratante à l'aloe vera",
 		i18n: {
 			name: "products.items.intensiveCareAloeVeraHydrationLotion.name",
 			description:
@@ -233,7 +253,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Lotion hydratante à l'aloe vera pour une sensation fraîche",
 		skinTypes: ["sensible", "normal", "sec"],
 		environment: ["faible", "moyenne"],
 		benefits: [],
@@ -245,6 +266,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "12",
+		name: "Lotion apaisante réparation",
 		i18n: {
 			name: "products.items.intensiveCareCalmHealingLotion.name",
 			description:
@@ -256,7 +278,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Lotion apaisante pour calmer et réparer les peaux sensibles",
 		skinTypes: ["sensible", "sec"],
 		environment: ["faible", "moyenne"],
 		benefits: [],
@@ -268,6 +291,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "13",
+		name: "Crème mains intensive force",
 		i18n: {
 			name: "products.items.intensiveCareHydraStrengthHandCreme.name",
 			description:
@@ -279,7 +303,7 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-mains",
-		description: "",
+		description: "Crème mains intensive pour renforcer et hydrater",
 		skinTypes: ["sec", "très-sec"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -291,6 +315,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "14",
+		name: "Crème mains intensive réparation",
 		i18n: {
 			name: "products.items.intensiveCareHydraReplenishHandCreme.name",
 			description:
@@ -302,7 +327,7 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-mains",
-		description: "",
+		description: "Crème mains pour restaurer et nourrir la peau",
 		skinTypes: ["sec", "très-sec", "sensible"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -314,6 +339,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "15",
+		name: "Lotion sérum VitaB3 souplesse",
 		i18n: {
 			name: "products.items.proVitab3SuppleAndSoftSerumBurstLotion.name",
 			description:
@@ -325,7 +351,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Lotion avec sérum enrichi en vitamine B3 pour une peau souple et douce",
 		skinTypes: ["normal", "sec"],
 		environment: ["faible", "moyenne"],
 		benefits: [],
@@ -337,6 +364,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "16",
+		name: "Lotion sérum VitaB3 éclat lumineux",
 		i18n: {
 			name: "products.items.proVitab3LuminousGlowSerumBurstLotion.name",
 			description:
@@ -348,7 +376,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description:
+			"Lotion avec sérum pour un éclat lumineux et une peau uniforme",
 		skinTypes: ["normal", "sec", "mixte"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -360,6 +389,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "17",
+		name: "Lotion mains ongles renforcés",
 		i18n: {
 			name: "products.items.intensiveCareHealthyHandsStrongerNailsLotion.name",
 			description:
@@ -371,7 +401,8 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-mains",
-		description: "",
+		description:
+			"Lotion mains pour renforcer les ongles et hydrater la peau",
 		skinTypes: ["sec", "très-sec"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
@@ -383,6 +414,7 @@ export const vaselineProducts = [
 	},
 	{
 		id: "18",
+		name: "Bâton baume multi-usages",
 		i18n: {
 			name: "products.items.allOverBodyBalmJellyStick.name",
 			description: "products.items.allOverBodyBalmJellyStick.description",
@@ -393,7 +425,7 @@ export const vaselineProducts = [
 			],
 		},
 		category: "soin-corps",
-		description: "",
+		description: "Bâton baume multi-usages pour une hydratation nomade",
 		skinTypes: ["sec", "sensible", "normal"],
 		environment: ["faible", "moyenne", "élevée"],
 		benefits: [],
