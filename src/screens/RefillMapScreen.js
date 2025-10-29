@@ -405,63 +405,67 @@ export default function RefillMapScreen({ route, navigation }) {
 					headerSubtitle="Localiser les bornes et les produits disponibles"
 					navigation={navigation}
 				/>
-				<View style={styles.mapWrapper}>
-					{loading ? (
-						<View style={styles.loader}>
-							<ActivityIndicator color={colors.primary} />
-							<Text style={styles.loaderText}>
-								Localisation en cours…
-							</Text>
-						</View>
-					) : (
-						<MapView
-							ref={mapRef}
-							style={styles.map}
-							provider={PROVIDER_GOOGLE}
-							initialRegion={
-								region || {
-									...DEFAULT_COORDS,
-									latitudeDelta: 0.08,
-									longitudeDelta: 0.08,
+				<View style={styles.centeredContainer}>
+					<View style={styles.mapWrapper}>
+						{loading ? (
+							<View style={styles.loader}>
+								<ActivityIndicator color={colors.primary} />
+								<Text style={styles.loaderText}>
+									Localisation en cours…
+								</Text>
+							</View>
+						) : (
+							<MapView
+								ref={mapRef}
+								style={styles.map}
+								provider={PROVIDER_GOOGLE}
+								initialRegion={
+									region || {
+										...DEFAULT_COORDS,
+										latitudeDelta: 0.08,
+										longitudeDelta: 0.08,
+									}
 								}
-							}
-							onRegionChangeComplete={setRegion}
-							showsUserLocation={!!location}
-							followsUserLocation={false}
-							showsMyLocationButton={false}
-						>
-							{MOCK_STATIONS.map((station) => (
-								<Marker
-									key={station.id}
-									coordinate={station.coords}
-									title={station.name}
-									description={`Type: ${
-										station.type || "Supermarché"
-									}`}
-									pinColor={colors.primary}
-									onPress={() => handleOpenStation(station)}
-								/>
-							))}
-						</MapView>
-					)}
-
-					{/* Bouton personnalisé de localisation */}
-					{!loading ? (
-						<View style={styles.locateFab}>
-							<TouchableOpacity
-								style={styles.locateButton}
-								onPress={recenterToUser}
-								accessibilityLabel="Me localiser"
+								onRegionChangeComplete={setRegion}
+								showsUserLocation={!!location}
+								followsUserLocation={false}
+								showsMyLocationButton={false}
 							>
-								<AppIcon
-									name="crosshairs-gps"
-									provider="MaterialCommunityIcons"
-									size={22}
-									color={colors.background}
-								/>
-							</TouchableOpacity>
-						</View>
-					) : null}
+								{MOCK_STATIONS.map((station) => (
+									<Marker
+										key={station.id}
+										coordinate={station.coords}
+										title={station.name}
+										description={`Type: ${
+											station.type || "Supermarché"
+										}`}
+										pinColor={colors.primary}
+										onPress={() =>
+											handleOpenStation(station)
+										}
+									/>
+								))}
+							</MapView>
+						)}
+
+						{/* Bouton personnalisé de localisation */}
+						{!loading ? (
+							<View style={styles.locateFab}>
+								<TouchableOpacity
+									style={styles.locateButton}
+									onPress={recenterToUser}
+									accessibilityLabel="Me localiser"
+								>
+									<AppIcon
+										name="crosshairs-gps"
+										provider="MaterialCommunityIcons"
+										size={22}
+										color={colors.background}
+									/>
+								</TouchableOpacity>
+							</View>
+						) : null}
+					</View>
 				</View>
 
 				{Platform.OS === "web" ? (
@@ -538,12 +542,16 @@ const getStyles = (c) =>
 		container: {
 			flex: 1,
 			backgroundColor: c.background,
-			paddingBottom: spacing.lg,
+		},
+		centeredContainer: {
+			flex: 1,
+			justifyContent: "center",
+			alignItems: "center",
+			paddingHorizontal: spacing.lg,
 		},
 		mapWrapper: {
+			width: "100%",
 			height: "80%",
-			top: -30,
-			marginHorizontal: spacing.xl,
 			borderRadius: radius.xxl,
 			borderWidth: 3,
 			borderColor: c.primaryBorder,
@@ -564,7 +572,26 @@ const getStyles = (c) =>
 		},
 		footer: {
 			paddingHorizontal: spacing.xl,
-			paddingBottom: spacing.xxl, // espace car pas de dock ici
+			paddingBottom: spacing.xxl,
+		},
+		webHelp: {
+			padding: spacing.md,
+			marginHorizontal: spacing.lg,
+			backgroundColor: c.surface,
+			borderRadius: radius.md,
+			marginBottom: spacing.md,
+		},
+		webHelpText: {
+			...typography.bodySmall,
+			color: c.textMuted,
+			textAlign: "center",
+		},
+		errorText: {
+			...typography.bodySmall,
+			color: c.error,
+			textAlign: "center",
+			padding: spacing.md,
+			marginHorizontal: spacing.lg,
 		},
 		modalBackdrop: {
 			flex: 1,
