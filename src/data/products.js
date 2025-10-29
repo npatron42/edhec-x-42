@@ -437,5 +437,8 @@ export const vaselineProducts = [
 	},
 ]
 
+// Alias pour compatibilité descendante
+export const doveProducts = vaselineProducts;
+
 // Le questionnaire a été retiré de l'application.
 export const questionnaire = []

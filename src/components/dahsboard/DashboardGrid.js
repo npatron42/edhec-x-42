@@ -109,10 +109,10 @@ const EconomyIcon = ({ color = "#000000", size = 24 }) => (
 	</Svg>
 )
 
-export default function DashboardGrid({ navigation }) {
-	const colors = useTheme()
+export default function DashboardGrid({ navigation: navProp }) {
+	const { colors } = useTheme()
 	const styles = getStyles(colors)
-	const navigation = useNavigation()
+	const nav = navProp || useNavigation()
 
 	const cards = [
 		{
@@ -124,7 +124,7 @@ export default function DashboardGrid({ navigation }) {
 			},
 			badgeColor: colors.primarySoft,
 			iconColor: colors.primary,
-			onPress: () => navigation.navigate('CameraCapture'),
+			onPress: () => nav.navigate('CameraCapture'),
 		},
 		{
 			key: "recommendations",
@@ -142,7 +142,7 @@ export default function DashboardGrid({ navigation }) {
 			icon: { name: "shopping-bag", provider: "Feather" },
 			badgeColor: colors.surfaceAlt,
 			iconColor: colors.primaryDark,
-			onPress: () => navigation?.navigate("Products"),
+			onPress: () => nav?.navigate("Products"),
 		},
 		{
 			key: "savings",
@@ -239,79 +239,31 @@ export default function DashboardGrid({ navigation }) {
 												/>
 											)}
 										</View>
-										<Text
-											style={[
-												styles.cardTitle,
-												{ color: "white" },
-											]}
-										>
-											{title}
-										</Text>
-										{value ? (
-											<Text
-												style={[
-													styles.cardValue,
-												{ color: "white" },
-											]}
-											>
-												{value}
-												{valueSuffix
-													? ` ${valueSuffix}`
-													: ""}
-											</Text>
+										<Text style={[styles.titleText, { color: 'white' }]}>{title}</Text>
+										{typeof value !== 'undefined' ? (
+											<Text style={[styles.valueText, { color: valueColor || 'white' }]}>{value}{valueSuffix ? ` ${valueSuffix}` : ''}</Text>
+										) : null}
+										{description ? (
+											<Text style={[styles.descText, { color: 'rgba(255,255,255,0.85)' }]}>{description}</Text>
 										) : null}
 									</LinearGradient>
 								) : (
-									<>
-										<View
-											style={[
-												styles.iconBadge,
-												{
-													backgroundColor:
-														"rgba(59, 130, 246, 0.1)",
-												},
-											]}
-										>
+									<View style={styles.itemInner}>
+										<View style={[styles.iconBadge, { backgroundColor: badgeColor }]}>
 											{icon.type === "custom" ? (
-												<icon.component
-													color={iconColor}
-													size={24}
-												/>
+												<icon.component color={iconColor} size={22} />
 											) : (
-												<AppIcon
-													name={icon.name}
-													provider={icon.provider}
-													color={iconColor}
-													size={24}
-												/>
+												<AppIcon name={icon.name} provider={icon.provider} color={iconColor} size={22} />
 											)}
 										</View>
-										<Text
-											style={[
-												styles.cardTitle,
-												{ color: colors.textPrimary },
-											]}
-										>
-											{title}
-										</Text>
-										{value ? (
-											<Text
-												style={[
-													styles.cardValue,
-												{
-														color:
-															valueColor ||
-															colors.textPrimary,
-												},
-											]}
-											>
-												{value}
-												{valueSuffix
-														? ` ${valueSuffix}`
-														: ""}
-											</Text>
+										<Text style={styles.titleText}>{title}</Text>
+										{typeof value !== 'undefined' ? (
+											<Text style={[styles.valueText, { color: valueColor }]}>{value}{valueSuffix ? ` ${valueSuffix}` : ''}</Text>
 										) : null}
-									</>
+										{description ? (
+											<Text style={[styles.descText, { color: '#3C4856' }]}>{description}</Text>
+										) : null}
+									</View>
 								)}
 							</CardComponent>
 						)
@@ -322,68 +274,42 @@ export default function DashboardGrid({ navigation }) {
 	)
 }
 
-const getStyles = (colors) => {
-	return StyleSheet.create({
+const getStyles = (colors) =>
+	StyleSheet.create({
 		container: {
-			paddingHorizontal: spacing.xl,
-			position: "fixed",
-			bottom: -6,
-			left: 0,
-			right: 0,
-			zIndex: 1000,
-			padding: spacing.md,
+			paddingHorizontal: spacing.md,
 		},
 		grid: {
 			flexDirection: "row",
 			flexWrap: "wrap",
-			justifyContent: "space-between",
-			gap: 10,
-			marginTop: 20,
+			gap: spacing.md,
+			justifyContent: "center",
 		},
 		gridItem: {
-			flexBasis: "32%",
-			maxWidth: "31.5%",
-			maxHeight: 120,
-			borderRadius: radius.md,
-			overflow: "hidden",
+			width: "47%",
+			borderRadius: radius.xl,
+			backgroundColor: "white",
 			padding: spacing.md,
-			alignItems: "flex-start",
-			gap: spacing.xs,
-			marginBottom: spacing.xs,
-			borderColor: colors.border,
-			backgroundColor: "#ffffff",
+			height: 160,
 		},
 		specialGridItem: {
-			backgroundColor: "transparent",
-			padding: 0,
+			backgroundColor: "#212F59",
 		},
 		gradientContainer: {
 			flex: 1,
+			borderRadius: radius.xl,
 			padding: spacing.md,
-			alignItems: "flex-start",
-			gap: spacing.xs,
-			borderRadius: radius.md,
 		},
 		iconBadge: {
-			alignSelf: "flex-start",
-			borderRadius: radius.full,
-			padding: spacing.sm,
+			width: 36,
+			height: 36,
+			alignItems: "center",
+			justifyContent: "center",
+			borderRadius: radius.lg,
 			marginBottom: spacing.sm,
 		},
-		cardTitle: {
-			fontSize: 16,
-			fontWeight: "600",
-			marginBottom: spacing.xs,
-		},
-		cardValue: {
-			fontSize: 20,
-			fontWeight: "700",
-			marginBottom: spacing.xs,
-		},
-		cardDescription: {
-			fontSize: 13,
-			lineHeight: 18,
-			flexShrink: 1,
-		},
+		itemInner: { flex: 1 },
+		titleText: { fontWeight: "700" },
+		valueText: { fontWeight: "800", fontSize: 18, marginTop: spacing.xs },
+		descText: { fontSize: 12, marginTop: spacing.xs },
 	})
-}

@@ -127,7 +127,7 @@ export default function BeautyAnalysisScreen({ route, navigation }){
             _aiRecs: Array.isArray(outRecs) ? outRecs.slice(0, 8) : [],
             step1: p?.ai?.skin_type || (p?.skin_tone ? (p.skin_tone.mst_bin <= 3 ? 'sec' : p.skin_tone.mst_bin >= 7 ? 'gras' : 'normal') : 'normal'),
             step2: (p?.env?.uv_index ?? 4) > 6 ? 'élevée' : (p?.env?.humidity ?? 50) > 70 ? 'moyenne' : 'faible',
-            step3: outRecs.map(r => r.category).slice(0,2),
+            step3: (outRecs || []).map(r => r.category).slice(0,2),
             step4: inferNeedsFromProfile(p),
             step5: 'monthly',
           };
@@ -175,7 +175,7 @@ export default function BeautyAnalysisScreen({ route, navigation }){
       // Si IA dispo, conserver son type de peau tel quel
       step1: profile?.ai?.skin_type || (profile?.skin_tone ? (profile.skin_tone.mst_bin <= 3 ? 'sec' : profile.skin_tone.mst_bin >= 7 ? 'gras' : 'normal') : 'normal'),
       step2: (profile?.env?.uv_index ?? 4) > 6 ? 'élevée' : (profile?.env?.humidity ?? 50) > 70 ? 'moyenne' : 'faible',
-      step3: recs.map(r => r.category).slice(0,2),
+      step3: (recs || []).map(r => r.category).slice(0,2),
       step4: inferNeedsFromProfile(profile),
       step5: 'monthly',
     };

@@ -1,12 +1,16 @@
 // Envoi du selfie + contexte à Google Gemini (Generative Language API) pour une analyse et recommandations.
 // Retour aligné avec analyzeWithChatGPT: { analysis: {...}, recommendations: Product[], rationale: string }
 import { getGeminiKey } from '../env/config';
+import { vaselineProducts as localCatalog, doveProducts as aliasCatalog } from '../data/products';
 
-const VERSION_CANDIDATES = ['v1beta', 'v1'];
-const MODEL_CANDIDATES = [
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-light',
-];
+// Utiliser uniquement l'API v1beta (plus tolérante et compatible)
+const VERSION_CANDIDATES = ['v1beta'];
+// Modèles compatibles par version (évite les 404 NOT_FOUND)
+const MODELS_BY_VERSION = {
+  v1beta: [
+    'gemini-2.5-flash',
+  ],
+};
 
 const REQ_TIMEOUT_MS = 120000;
 const BUDGET_TIMEOUT_MS = 180000;
@@ -31,12 +35,18 @@ export async function analyzeWithGemini({ base64, envSignals, products }){
     err.code = 401; throw err;
   }
 
-  const prompt = buildPrompt({ envSignals, products });
+  // Sélection robuste du catalogue
+  const catalog = Array.isArray(products) && products.length
+    ? products
+    : (Array.isArray(aliasCatalog) && aliasCatalog.length ? aliasCatalog : (Array.isArray(localCatalog) ? localCatalog : []));
+
+  const prompt = buildPrompt({ envSignals, products: catalog });
 
   let lastError = null;
   const started = Date.now();
   for (const ver of VERSION_CANDIDATES) {
-    for (const model of MODEL_CANDIDATES) {
+    const modelList = MODELS_BY_VERSION[ver] || [];
+    for (const model of modelList) {
       if (Date.now() - started > BUDGET_TIMEOUT_MS) { lastError = lastError || new Error('Timeout monolithique'); break; }
       const body = {
         contents: [
@@ -66,13 +76,18 @@ export async function analyzeWithGemini({ base64, envSignals, products }){
         const text = json?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
         let data; try { data = JSON.parse(text); } catch { data = {}; }
 
+        // Tolérance si le modèle retourne un objet directement
+        if (!data.analysis && json?.candidates?.[0]?.content?.parts?.[0]?.text && typeof json.candidates[0].content.parts[0].text === 'object') {
+          data = json.candidates[0].content.parts[0].text;
+        }
+
+        const safeCatalog = Array.isArray(catalog) ? catalog : [];
         let mapped = Array.isArray(data.recommendations) ? data.recommendations.map((r) => {
           const rid = r?.id != null ? String(r.id).trim() : null;
           const rname = r?.name ? String(r.name).trim().toLowerCase() : null;
-          let match = rid ? products.find(p => String(p.id) === rid) : null;
-          if (!match && rname) match = products.find(p => String(p.name||'').trim().toLowerCase() === rname);
-          // Pas de fallback par catégorie pour éviter les faux positifs
-          if (!match) return null;
+          let match = rid ? safeCatalog.find(p => String(p.id) === rid) : null;
+          if (!match && rname) match = safeCatalog.find(p => String(p.name||'').trim().toLowerCase() === rname);
+          if (!match) return null; // strict: seulement le catalogue local
 
           const rawScore = typeof r?.match_score === 'number' ? r.match_score : undefined;
           const matchScore = Math.max(0, Math.min(100, rawScore ?? (match.matchScore ?? 0)));
@@ -87,6 +102,7 @@ export async function analyzeWithGemini({ base64, envSignals, products }){
           };
         }).filter(Boolean) : [];
 
+        // Déduplication & boost si nécessaire
         const seen = new Set();
         mapped = mapped.filter(p => { const id = String(p.id); if (seen.has(id)) return false; seen.add(id); return true; });
 
@@ -99,9 +115,10 @@ export async function analyzeWithGemini({ base64, envSignals, products }){
           mapped = mapped.map(x => ({ ...x, matchScore: boostedById[String(x.id)] ?? x.matchScore }));
         }
 
+        // Compléter jusqu'à 8 avec le catalogue local si besoin
         if (mapped.length < 8) {
           const selectedIds = new Set(mapped.map(p => String(p.id)));
-          for (const prod of products) {
+          for (const prod of safeCatalog) {
             if (mapped.length >= 8) break;
             const pid = String(prod.id);
             if (selectedIds.has(pid)) continue;
@@ -113,7 +130,7 @@ export async function analyzeWithGemini({ base64, envSignals, products }){
 
         return { analysis: data.analysis || {}, rationale: typeof data.rationale === 'string' ? data.rationale : '', recommendations: mapped };
       } catch (e) {
-        lastError = e;
+        lastError = e.name === 'AbortError' ? new Error('Timeout requête Gemini') : e;
       }
     }
   }
@@ -121,7 +138,8 @@ export async function analyzeWithGemini({ base64, envSignals, products }){
 }
 
 function buildPrompt({ envSignals, products }){
-  const catalog = products.map(p => ({ id: p.id, name: p.name, category: p.category, benefits: p.benefits, skinTypes: p.skinTypes, environment: p.environment }));
+  const safeProducts = Array.isArray(products) ? products : [];
+  const catalog = safeProducts.map(p => ({ id: p.id, name: p.name, category: p.category, benefits: p.benefits, skinTypes: p.skinTypes, environment: p.environment }));
   return [
     'Tu es un expert dermo-cosmétique et visagiste.',
     "Reçois un selfie (image jointe), des signaux environnement (UV, pollution, humidité...), et un catalogue de produits Vaseline (liste fournie).",
