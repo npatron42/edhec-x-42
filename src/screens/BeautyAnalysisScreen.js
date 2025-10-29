@@ -300,7 +300,11 @@ export default function BeautyAnalysisScreen({ route, navigation }){
               </View>
               {recs.slice(0,3).map((p, idx) => (
                 <View key={`rec-${p.id}-${idx}`} style={styles.productRow}>
-                  <Text style={styles.productEmoji}>{p.image || '🧴'}</Text>
+                  {p?.image ? (
+                    <Image source={p.image} style={styles.productArtwork} resizeMode="contain" />
+                  ) : (
+                    <Text style={styles.productEmoji}>🧴</Text>
+                  )}
                   <View style={{ flex: 1 }}>
                     <Text style={styles.productName}>{p.name}</Text>
                     <Text style={styles.productDesc}>{p.description}</Text>
@@ -355,6 +359,7 @@ const getStyles = (colors) => StyleSheet.create({
   envRow: { flexDirection: 'row', gap: spacing.sm },
   productRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm, gap: spacing.md },
   productEmoji: { fontSize: 28 },
+  productArtwork: { width: 44, height: 44, borderRadius: radius.md, backgroundColor: 'transparent' },
   productName: { ...typography.bodyLarge, color: colors.textPrimary, fontWeight: '600' },
   productDesc: { ...typography.caption, color: colors.textSecondary },
   bottomActions: { marginTop: spacing.xl, paddingBottom: spacing.xl },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, PanResponder, Dimensions, Platform, ScrollView, useWindowDimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Animated, PanResponder, Dimensions, Platform, ScrollView, useWindowDimensions, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppButton, AppHeader, AppIcon } from '../components/common';
@@ -173,9 +173,11 @@ export default function ProductMatchingScreen({ route, navigation }) {
                                         end={{ x: 1, y: 1 }}
                                         style={styles.selectedProductGradient}
                                     >
-                                        <Text style={styles.selectedProductEmoji}>
-                                            {product?.image || '🧴'}
-                                        </Text>
+                                        {product?.image ? (
+                                          <Image source={product.image} style={styles.selectedProductArtwork} resizeMode="contain" />
+                                        ) : (
+                                          <Text style={styles.selectedProductEmoji}>🧴</Text>
+                                        )}
                                         <View style={styles.selectedProductInfo}>
                                             <Text style={[styles.selectedProductName, { color: colors.textPrimary }]}>
                                                 {product?.name || 'Produit'}
@@ -336,7 +338,12 @@ export default function ProductMatchingScreen({ route, navigation }) {
                             />
                             <Text style={[styles.matchBadgeText, { color: colors.onPrimaryText }]}>{matchInfo.title}</Text>
                         </View>
-                        <Text style={[styles.cardEmoji, { fontSize: emojiSize }]}>{currentProduct?.image || '🧴'}</Text>
+                        {/* Replace emoji/number with product artwork */}
+                        {currentProduct?.image ? (
+                          <Image source={currentProduct.image} style={styles.cardArtwork} resizeMode="contain" />
+                        ) : (
+                          <Text style={[styles.cardEmoji, { fontSize: emojiSize }]}>🧴</Text>
+                        )}
                         <Text numberOfLines={2} style={[styles.cardTitle, { color: colors.textPrimary }]}>{currentProduct?.name || ''}</Text>
                         <Text numberOfLines={3} style={[styles.cardDescription, { color: colors.textSecondary, lineHeight: 22 }]}>
                             {currentProduct?.description || ''}
@@ -515,7 +522,7 @@ const styles = StyleSheet.create({
         padding: spacing.lg,
     },
     selectedProductEmoji: {
-        fontSize: 40,
+        fontSize: 28,
         marginRight: spacing.md,
     },
     selectedProductInfo: {
@@ -572,13 +579,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    cardEmoji: {
-        fontSize: 80,
-        marginBottom: spacing.lg,
-        textShadowColor: 'rgba(0, 0, 0, 0.1)',
-        textShadowOffset: { width: 0, height: 4 },
-        textShadowRadius: 8,
-    },
+    cardEmoji: { textAlign: 'center', marginBottom: spacing.md },
+    cardArtwork: { alignSelf: 'center', width: 140, height: 140, marginBottom: spacing.md, borderRadius: radius.lg, backgroundColor: 'transparent' },
     cardTitle: {
         ...typography.h2,
         textAlign: 'center',
