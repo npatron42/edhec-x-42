@@ -433,6 +433,7 @@ export const vaselineProducts = [
 		plasticSaved: 40,
 		priceRegular: 6.5,
 		priceRefill: 4.6,
+        
 		image: require("../../assets/vaseline/vaseline-all-over-body-balm-jelly-stick.avif"),
 	},
 ]

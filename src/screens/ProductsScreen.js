@@ -6,6 +6,7 @@ import {
 	ScrollView,
 	Platform,
 	Image,
+	Dimensions,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { vaselineProducts } from "../data/products"
@@ -15,6 +16,8 @@ import Header from "./Header"
 
 export default function ProductsScreen({ navigation }) {
 	const { colors: themeColors } = useTheme()
+	const screenHeight = Dimensions.get("screen").height
+	const headerHeight = screenHeight / 5
 	const bodyProducts = vaselineProducts.filter(
 		(p) => p.category === "soin-corps",
 	)
@@ -37,16 +40,32 @@ export default function ProductsScreen({ navigation }) {
 				headerSubtitle="Découvrez les produits Vaseline adaptés à votre profil"
 				navigation={navigation}
 			/>
-			<ScrollView style={styles.content}>
+			<ScrollView
+				style={styles.content}
+				contentContainerStyle={[
+					styles.contentContainer,
+					{ paddingTop: headerHeight + spacing.md },
+				]}
+			>
 				<View style={styles.section}>
-					<Text
-						style={[
-							styles.sectionTitle,
-							{ color: themeColors.textPrimary },
-						]}
-					>
-						Soins corps
-					</Text>
+					<View style={styles.sectionHeader}>
+						<View style={styles.sectionTitleContainer}>
+							<Text
+								style={[
+									styles.sectionTitle,
+									{ color: themeColors.textPrimary },
+								]}
+							>
+								Soins du corps
+							</Text>
+							<View
+								style={[
+									styles.sectionUnderline,
+									{ backgroundColor: themeColors.primary },
+								]}
+							/>
+						</View>
+					</View>
 					<ScrollView
 						horizontal
 						showsHorizontalScrollIndicator={false}
@@ -88,14 +107,24 @@ export default function ProductsScreen({ navigation }) {
 				</View>
 
 				<View style={styles.section}>
-					<Text
-						style={[
-							styles.sectionTitle,
-							{ color: themeColors.textPrimary },
-						]}
-					>
-						Soins mains
-					</Text>
+					<View style={styles.sectionHeader}>
+						<View style={styles.sectionTitleContainer}>
+							<Text
+								style={[
+									styles.sectionTitle,
+									{ color: themeColors.textPrimary },
+								]}
+							>
+								Soins des mains
+							</Text>
+							<View
+								style={[
+									styles.sectionUnderline,
+									{ backgroundColor: themeColors.primary },
+								]}
+							/>
+						</View>
+					</View>
 					<ScrollView
 						horizontal
 						showsHorizontalScrollIndicator={false}
@@ -137,14 +166,24 @@ export default function ProductsScreen({ navigation }) {
 				</View>
 
 				<View style={styles.section}>
-					<Text
-						style={[
-							styles.sectionTitle,
-							{ color: themeColors.textPrimary },
-						]}
-					>
-						Soins lèvres
-					</Text>
+					<View style={styles.sectionHeader}>
+						<View style={styles.sectionTitleContainer}>
+							<Text
+								style={[
+									styles.sectionTitle,
+									{ color: themeColors.textPrimary },
+								]}
+							>
+								Soins lèvres
+							</Text>
+							<View
+								style={[
+									styles.sectionUnderline,
+									{ backgroundColor: themeColors.primary },
+								]}
+							/>
+						</View>
+					</View>
 					<ScrollView
 						horizontal
 						showsHorizontalScrollIndicator={false}
@@ -199,16 +238,33 @@ const styles = StyleSheet.create({
 	content: {
 		flexGrow: 1,
 		paddingHorizontal: spacing.xl,
-		paddingBottom: spacing.xxxl,
-		...(Platform.OS === "web" && { minHeight: "100vh" }),
+	},
+	contentContainer: {
+		paddingBottom: 100,
 	},
 	section: {
-		marginTop: spacing.lg,
-		marginBottom: spacing.xl,
+		marginTop: spacing.md,
+		marginBottom: spacing.lg,
+	},
+	sectionHeader: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: spacing.md,
+	},
+	sectionTitleContainer: {
+		flex: 1,
 	},
 	sectionTitle: {
-		...typography.h3,
-		marginBottom: spacing.md,
+		...typography.h4,
+		fontWeight: "bold",
+	},
+	sectionUnderline: {
+		width: "75%",
+		height: 2,
+		marginTop: spacing.xs,
+	},
+	sectionIcon: {
+		marginLeft: 8,
 	},
 	horizontalList: {
 		paddingRight: spacing.xl,
@@ -235,11 +291,11 @@ const styles = StyleSheet.create({
 		...shadow.soft,
 	},
 	hCard: {
-		width: 220,
+		width: 160,
 		borderWidth: 1,
 		borderColor: colors.border,
 		borderRadius: radius.lg,
-		padding: spacing.md,
+		padding: spacing.sm,
 		marginRight: spacing.md,
 		...shadow.soft,
 	},
@@ -251,10 +307,10 @@ const styles = StyleSheet.create({
 		borderRadius: radius.md,
 	},
 	hImage: {
-		width: 160,
-		height: 160,
+		width: 120,
+		height: 120,
 		alignSelf: "center",
-		marginBottom: spacing.sm,
+		marginBottom: spacing.xs,
 		resizeMode: "contain",
 		borderRadius: radius.md,
 	},
@@ -267,6 +323,16 @@ const styles = StyleSheet.create({
 		color: colors.textSecondary,
 		marginTop: spacing.xs,
 	},
-	hName: { ...typography.h5, marginTop: spacing.xs },
-	hDesc: { ...typography.caption, marginTop: spacing.xs },
+	hName: {
+		...typography.h6,
+		marginTop: spacing.xs,
+		fontSize: 13,
+		lineHeight: 16,
+	},
+	hDesc: {
+		...typography.caption,
+		marginTop: spacing.xs,
+		fontSize: 11,
+		lineHeight: 14,
+	},
 })
