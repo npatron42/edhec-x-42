@@ -151,6 +151,7 @@ function buildPrompt({ envSignals, products }){
     "Assure au moins 3 produits avec match_score ≥ 85 (excellent), le reste varié avec des scores plus faibles.",
     'Rédige short_description en français, concise et orientée bénéfices.',
     "Hair: si les cheveux ne sont pas clairement visibles, indique type='--' et laisse frizz/shine à 0.5 par défaut; sinon estime-les prudemment.",
+    "IMPORTANT: La photo est un visage/cheveux. Priorise les catégories liées au visage et aux lèvres (ex: 'soin-visage', 'soin-levres'). Dépriorise les catégories moins liées au visage comme 'soin-mains' sauf raison explicite.",
     'Règles: privilégier hydratation si peau/ambiance sèches, apaisement si rougeurs, éclat si UV élevés.',
     'Catalogue: ' + JSON.stringify(catalog),
     'Environnement: ' + JSON.stringify(envSignals || {}),

@@ -8,6 +8,11 @@ export const getRecommendedProducts = (answers) => {
 		return answers._aiRecs.filter(Boolean).map((p) => ({ ...p }))
 	}
 
+	// Focalisation par contexte (p.ex. après analyse visage/cheveux)
+	const focus = answers?._focus || null;
+	const focusCategories = focus === 'face-hair' ? new Set(['soin-visage', 'soin-levres']) : null;
+	const deprioritizeCategories = focus === 'face-hair' ? new Set(['soin-mains', 'soin-corps']) : null;
+
 	// Nouveau: si profil IA présent
 	if (answers && answers._beautyProfile) {
 		const p = answers._beautyProfile
@@ -92,6 +97,16 @@ export const getRecommendedProducts = (answers) => {
 				reasons.push("Frisottis élevés")
 			}
 
+			// Biais de contexte: privilégier visage/levres si l’analyse provient du visage/cheveux
+			if (focusCategories && focusCategories.has(prod.category)) {
+				score += 20
+				reasons.push("Priorité visage/cheveux")
+			}
+			if (deprioritizeCategories && deprioritizeCategories.has(prod.category)) {
+				score -= 15
+				reasons.push("Moins pertinent pour visage/cheveux")
+			}
+
 			// Bonus diversité
 			score +=
 				[
@@ -103,7 +118,7 @@ export const getRecommendedProducts = (answers) => {
 				].indexOf(prod.category) * 2
 			return {
 				...prod,
-				matchScore: Math.min(100, score),
+				matchScore: Math.max(0, Math.min(100, score)),
 				_reasons: reasons,
 			}
 		})
@@ -148,6 +163,14 @@ export const getRecommendedProducts = (answers) => {
 				needs.some((need) => benefit.toLowerCase().includes(need)),
 			)
 			score += (matchingNeeds.length / Math.max(needs.length, 1)) * 20
+
+			// Biais de contexte (questionnaire) si pertinent
+			if (focusCategories && focusCategories.has(product.category)) {
+				score += 10
+			}
+			if (deprioritizeCategories && deprioritizeCategories.has(product.category)) {
+				score -= 10
+			}
 
 			return {
 				...product,

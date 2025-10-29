@@ -123,6 +123,7 @@ export default function BeautyAnalysisScreen({ route, navigation }){
             return Array.from(new Set([...(pp.needs||[]), ...needs])).slice(0,3);
           };
           const autoAnswers = {
+            _focus: 'face-hair',
             _beautyProfile: p,
             _aiRecs: Array.isArray(outRecs) ? outRecs.slice(0, 8) : [],
             step1: p?.ai?.skin_type || (p?.skin_tone ? (p.skin_tone.mst_bin <= 3 ? 'sec' : p.skin_tone.mst_bin >= 7 ? 'gras' : 'normal') : 'normal'),
@@ -169,6 +170,7 @@ export default function BeautyAnalysisScreen({ route, navigation }){
   const handleContinue = async () => {
     if (!profile) return;
     const answers = {
+      _focus: 'face-hair',
       _beautyProfile: profile,
       // Joindre aussi la sélection IA (ordre conservé) pour le Tinder-like
       _aiRecs: Array.isArray(recs) ? recs.slice(0, 8) : [],
