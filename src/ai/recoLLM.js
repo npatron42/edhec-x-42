@@ -7,8 +7,9 @@ const MODEL_CANDIDATES = [
   'gemini-2.0-flash-latest',
 ];
 
-const REQ_TIMEOUT_MS = 10000;   // timeout par tentative
-const BUDGET_TIMEOUT_MS = 16000; // budget global pour cette étape
+// Augmenter les timeouts (réseaux mobiles / latence API)
+const REQ_TIMEOUT_MS = 60000;   // 20s par tentative
+const BUDGET_TIMEOUT_MS = 65000; // 45s budget global
 
 async function fetchWithTimeout(url, options={}, timeoutMs=REQ_TIMEOUT_MS){
   const controller = new AbortController();
@@ -19,6 +20,12 @@ async function fetchWithTimeout(url, options={}, timeoutMs=REQ_TIMEOUT_MS){
     return res;
   } catch(e){
     clearTimeout(id);
+    // Normaliser AbortError -> Timeout pour affichage clair
+    if (e?.name === 'AbortError') {
+      const err = new Error('Timeout');
+      err.code = 408;
+      throw err;
+    }
     throw e;
   }
 }
@@ -57,7 +64,14 @@ export async function recommendFromAnalysis({ analysisJson, products }){
 
         const recs = normalizeRecs(data?.recommendations || data || [], products);
         return { recommendations: recs, rationale: data?.rationale || '' };
-      } catch(e){ lastError = e; }
+      } catch(e){
+        if (e?.name === 'AbortError') {
+          const err = new Error('Timeout');
+          err.code = 408; lastError = err;
+        } else {
+          lastError = e;
+        }
+      }
     }
   }
   throw lastError || new Error('Gemini indisponible');

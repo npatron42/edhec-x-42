@@ -7,6 +7,7 @@ import { getRecommendedProducts, getMatchMessage } from '../utils/recommendation
 import { saveSelectedProducts } from '../utils/storage';
 import { spacing, radius, shadow, typography } from '../styles/theme';
 import { useTheme } from '../styles/ThemeProvider';
+import Header from './Header';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width - spacing.xl * 2;
@@ -126,18 +127,22 @@ export default function ProductMatchingScreen({ route, navigation }) {
         navigation.navigate('RefillMap', { selectedProducts: likedProducts });
     };
 
+    // Espace sous l'en-tête gradient (même style que QR/Bornes)
+    const screenHeight = Dimensions.get('screen').height;
+    const headerHeight = screenHeight / 5;
+    const headerOffset = Math.ceil(headerHeight) + spacing.xl; // offset accru sous le header
+
     if (!products.length || currentIndex >= products.length) {
         return (
-            <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
-                <AppHeader
-                    title="Vos Recommandations"
-                    subtitle="Résultats"
-                    onBack={() => navigation.goBack()}
-                    compact
+            <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['bottom']}>
+                <Header
+                    headerTitle="Sélection terminée"
+                    headerSubtitle="Vos produits personnalisés sont prêts"
+                    navigation={navigation}
                 />
                 <ScrollView 
                     style={[styles.finishedContainer, { backgroundColor: colors.surface }]}
-                    contentContainerStyle={styles.finishedContentContainer}
+                    contentContainerStyle={[styles.finishedContentContainer, { paddingTop: headerOffset }]}
                     showsVerticalScrollIndicator={false}
                     bounces={true}
                 >

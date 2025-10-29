@@ -25,6 +25,7 @@ import SkinSummaryScreen from "./src/screens/SkinSummaryScreen";
 import HistoryScreen from "./src/screens/HistoryScreen";
 import ProductsScreen from "./src/screens/ProductsScreen";
 import { ThemeProvider, useTheme } from "./src/styles/ThemeProvider";
+import BeautyAnalysisScreen from "./src/screens/BeautyAnalysisScreen";
 
 const Stack = createStackNavigator();
 const navigationRef = createNavigationContainerRef();
@@ -139,7 +140,7 @@ function AppInner() {
     }
   }, []);
 
-  const showDock = !["RefillMap", "CameraCapture", "ProductMatching"].includes(
+  const showDock = !["CameraCapture", "ProductMatching", "BeautyAnalysis"].includes(
     currentRoute
   );
 
@@ -169,14 +170,17 @@ function AppInner() {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="SkinSummary" component={SkinSummaryScreen} />
           <Stack.Screen name="CameraCapture" component={CameraCaptureScreen} />
+          <Stack.Screen name="BeautyAnalysis" component={BeautyAnalysisScreen} />
           <Stack.Screen name="History" component={HistoryScreen} />
           <Stack.Screen name="Products" component={ProductsScreen} />
         </Stack.Navigator>
 
-        <FooterNavigation
-          navigationRef={navigationRef}
-          currentRoute={currentRoute}
-        />
+        {showDock && (
+          <FooterNavigation
+            navigationRef={navigationRef}
+            currentRoute={currentRoute}
+          />
+        )}
       </NavigationContainer>
     </SafeAreaProvider>
   );

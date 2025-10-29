@@ -5,11 +5,11 @@ import { getGeminiKey } from '../env/config';
 const VERSION_CANDIDATES = ['v1beta', 'v1'];
 const MODEL_CANDIDATES = [
   'gemini-2.5-flash',
-  'gemini-2.0-flash-latest',
+  'gemini-2.5-flash-light',
 ];
 
-const REQ_TIMEOUT_MS = 12000;
-const BUDGET_TIMEOUT_MS = 18000;
+const REQ_TIMEOUT_MS = 120000;
+const BUDGET_TIMEOUT_MS = 180000;
 
 async function fetchWithTimeout(url, options={}, timeoutMs=REQ_TIMEOUT_MS){
   const controller = new AbortController();
@@ -67,12 +67,11 @@ export async function analyzeWithGemini({ base64, envSignals, products }){
         let data; try { data = JSON.parse(text); } catch { data = {}; }
 
         let mapped = Array.isArray(data.recommendations) ? data.recommendations.map((r) => {
-          const rid = r?.id != null ? String(r.id) : null;
-          const rname = r?.name ? String(r.name).toLowerCase() : null;
-          const rcat = r?.category ? String(r.category) : null;
+          const rid = r?.id != null ? String(r.id).trim() : null;
+          const rname = r?.name ? String(r.name).trim().toLowerCase() : null;
           let match = rid ? products.find(p => String(p.id) === rid) : null;
-          if (!match && rname) match = products.find(p => String(p.name||'').toLowerCase() === rname);
-          if (!match && rcat) match = products.find(p => p.category === rcat);
+          if (!match && rname) match = products.find(p => String(p.name||'').trim().toLowerCase() === rname);
+          // Pas de fallback par catégorie pour éviter les faux positifs
           if (!match) return null;
 
           const rawScore = typeof r?.match_score === 'number' ? r.match_score : undefined;
@@ -122,16 +121,16 @@ export async function analyzeWithGemini({ base64, envSignals, products }){
 }
 
 function buildPrompt({ envSignals, products }){
-  const catalog = products.map(p => ({ id: p.id, name: p.name, category: p.category, benefits: p.benefits }));
+  const catalog = products.map(p => ({ id: p.id, name: p.name, category: p.category, benefits: p.benefits, skinTypes: p.skinTypes, environment: p.environment }));
   return [
     'Tu es un expert dermo-cosmétique et visagiste.',
-    'Reçois un selfie (image jointe), des signaux environnement (UV, pollution, humidité...), et un catalogue de produits Dove.',
+    "Reçois un selfie (image jointe), des signaux environnement (UV, pollution, humidité...), et un catalogue de produits Vaseline (liste fournie).",
     'Objectif: renvoyer STRICTEMENT un JSON (sans texte autour) avec:',
     "analysis: { skin_type: 'sec|normal|gras|mixte|sensible', needs: string[], notes: string[], hair: { type: 'raide|ondulé|bouclé|crépu|--', density: 'faible|moyenne|élevée', frizz: number(0..1), shine: number(0..1) } }",
     'recommendations: ProductRef[] EXACTEMENT 8 éléments issus du catalogue fourni, chacun sous la forme:',
-    "{ id|name|category, match_score: 0-100, short_description: string<=160, reasons?: string[] }",
-    "Contraintes: au moins 3 produits avec match_score ≥ 85 (excellent), le reste varié avec des scores plus faibles.",
-    "N'utilise pas d'IDs inventés. Prends id/name/category exactement depuis le catalogue.",
+    "{ id|name, category, match_score: 0-100, short_description: string<=160, reasons?: string[] }",
+    "Contraintes: choisis UNIQUEMENT des produits du catalogue fourni. Utilise l'id et le name EXACTS du catalogue. N'invente pas d'ID/nom/catégorie.",
+    "Assure au moins 3 produits avec match_score ≥ 85 (excellent), le reste varié avec des scores plus faibles.",
     'Rédige short_description en français, concise et orientée bénéfices.',
     "Hair: si les cheveux ne sont pas clairement visibles, indique type='--' et laisse frizz/shine à 0.5 par défaut; sinon estime-les prudemment.",
     'Règles: privilégier hydratation si peau/ambiance sèches, apaisement si rougeurs, éclat si UV élevés.',

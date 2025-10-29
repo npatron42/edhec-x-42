@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Platform, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, Platform, TouchableOpacity, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppButton, AppHeader, AppIcon } from '../components/common';
 import { spacing, radius, typography, shadow } from '../styles/theme';
@@ -9,18 +9,58 @@ import { analyzeWithGemini } from '../ai/geminiAnalysis';
 import { saveUserAnswers } from '../utils/storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../styles/ThemeProvider';
-import { analyzeVisionOnly } from '../ai/visionAnalysisLLM';
-import { recommendFromAnalysis } from '../ai/recoLLM';
+import Header from './Header';
 
 export default function BeautyAnalysisScreen({ route, navigation }){
   const { colors } = useTheme();
   const styles = getStyles(colors);
+
+  // Spinner animé pour l'état de chargement
+  const Spinner = () => {
+    const rotateAnim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+      const loop = Animated.loop(
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 900,
+          easing: undefined,
+          useNativeDriver: true,
+        })
+      );
+      loop.start();
+      return () => rotateAnim.stopAnimation();
+    }, [rotateAnim]);
+
+    const spin = rotateAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg'],
+    });
+
+    return (
+      <Animated.View
+        accessibilityRole="progressbar"
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: 36,
+          borderWidth: 4,
+          borderColor: 'rgba(0,0,0,0.08)',
+          borderTopColor: colors.primary,
+          transform: [{ rotate: spin }],
+        }}
+      />
+    );
+  };
 
   const { base64, coords } = route.params || {};
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
   const [recs, setRecs] = useState([]);
+
+  const screenHeight = Dimensions.get('screen').height;
+  const headerHeight = screenHeight / 5;
+  const headerOffset = Math.ceil(headerHeight) + spacing.xl; // offset accru sous le header
 
   useEffect(() => {
     let mounted = true;
@@ -31,18 +71,19 @@ export default function BeautyAnalysisScreen({ route, navigation }){
         if (Platform.OS === 'web') {
           console.warn('[AI] Web: appels directs API possibles erreurs CORS. Préférez iOS/Android.');
         }
-        console.log('[AI] Début analyse (Gemini seule)', { hasBase64: !!base64, coords });
+        console.log('[AI] Début analyse (monolithique)', { hasBase64: !!base64, coords });
         const env = coords ? await fetchEnvSignals(coords) : {};
         console.log('[AI] Signaux environnement', env);
 
-        let analysis = null; let outRecs = [];
+        // Appel monolithique: image + environnement + catalogue produits
+        let analysis = null; let outRecs = []; let rationale = '';
         try {
-          // Étape 1 + 2
-          const a = await analyzeVisionOnly({ base64, envSignals: env });
-          const r = await recommendFromAnalysis({ analysisJson: a, products: doveProducts });
-          analysis = a; outRecs = r?.recommendations || [];
+          const res = await analyzeWithGemini({ base64, envSignals: env, products: doveProducts });
+          analysis = res?.analysis || {};
+          outRecs = Array.isArray(res?.recommendations) ? res.recommendations : [];
+          rationale = typeof res?.rationale === 'string' ? res.rationale : '';
         } catch (gerr) {
-          console.error('[AI] Pipeline LLM KO', { code: gerr?.code, message: gerr?.message });
+          console.error('[AI] Pipeline monolithique KO', { code: gerr?.code, message: gerr?.message });
           const msg = gerr?.message?.includes('Timeout') ? 'Délai dépassé. Réessayez dans un instant.' : (gerr?.code === 429 ? 'Quota IA dépassé. Réessayez plus tard.' : 'Analyse IA indisponible. Vérifiez la connexion et la clé.');
           setError(msg);
           setProfile(null);
@@ -64,7 +105,7 @@ export default function BeautyAnalysisScreen({ route, navigation }){
               shine: typeof analysis.hair.shine === 'number' ? analysis.hair.shine : null,
             } : { type: '--', density: null, frizz: null, shine: null },
           },
-          rationale: '',
+          rationale,
           env,
         };
         setProfile(p);
@@ -159,19 +200,15 @@ export default function BeautyAnalysisScreen({ route, navigation }){
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={[styles.container, styles.center]}>
-          <LinearGradient colors={[colors.primary, colors.accent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: '100%', borderRadius: radius.xxl, padding: spacing.xxl, marginBottom: spacing.lg, ...shadow.strong }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Retour">
-                <AppIcon name="arrow-back" provider="Ionicons" size={22} color={colors.onPrimaryText} />
-              </TouchableOpacity>
-              <View style={{ marginLeft: spacing.sm }}>
-                <Text style={{ ...typography.h2, color: colors.onPrimaryText }}>Analyse visage et cheveux</Text>
-                <Text style={{ ...typography.body, color: colors.onPrimaryTextSoft, marginTop: spacing.xs }}>Scannez votre peau pour des recommandations personnalisées</Text>
-              </View>
-            </View>
-          </LinearGradient>
-          <Text style={styles.info}>Aucune photo. Reprenez une photo.</Text>
-          <AppButton label="Ouvrir la caméra" onPress={() => navigation.replace('CameraCapture')} icon={{ name: 'camera', provider: 'Ionicons' }} />
+          <Header
+            headerTitle="Analyse visage et cheveux"
+            headerSubtitle="Scannez votre peau pour des recommandations personnalisées"
+            navigation={navigation}
+          />
+          <View style={{ width: '100%', paddingHorizontal: spacing.lg, paddingTop: headerOffset }}>
+            <Text style={styles.info}>Aucune photo. Reprenez une photo.</Text>
+            <AppButton label="Ouvrir la caméra" onPress={() => navigation.replace('CameraCapture')} icon={{ name: 'camera', provider: 'Ionicons' }} />
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -180,26 +217,18 @@ export default function BeautyAnalysisScreen({ route, navigation }){
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-          {/* Hero bannière */}
-          <LinearGradient colors={[colors.primary, colors.accent]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.xxl, padding: spacing.xxl, marginBottom: spacing.lg, ...shadow.strong }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Retour">
-                <AppIcon name="arrow-back" provider="Ionicons" size={22} color={colors.onPrimaryText} />
-              </TouchableOpacity>
-              <View style={{ marginLeft: spacing.sm }}>
-                <Text style={{ ...typography.h2, color: colors.onPrimaryText }}>Analyse visage et cheveux</Text>
-                <Text style={{ ...typography.body, color: colors.onPrimaryTextSoft, marginTop: spacing.xs }}>Rapport IA et recommandations</Text>
-              </View>
-            </View>
-          </LinearGradient>
-
+        <Header
+          headerTitle="Analyse visage et cheveux"
+          headerSubtitle="Rapport IA et recommandations"
+          navigation={navigation}
+        />
+        <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingTop: headerOffset }]}>
           <View style={styles.hero}>
             <View style={styles.imageWrap}>
               <Image source={{ uri: `data:image/jpeg;base64,${base64}` }} style={styles.image} resizeMode="cover" />
               {loading ? (
                 <View style={styles.loadingOverlay}>
-                  <AppIcon provider="Feather" name="loader" size={24} color={colors.primary} />
+                  <Spinner />
                   <Text style={styles.loadingText}>Analyse en cours…</Text>
                 </View>
               ) : null}
@@ -304,13 +333,13 @@ function EnvPill({ label, value}){
 const getStyles = (colors) => StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, backgroundColor: colors.background },
-  center: { alignItems: 'center', justifyContent: 'center', padding: spacing.lg },
+  center: { alignItems: 'center', justifyContent: 'center' },
   scroll: { flex: 1 },
   scrollContent: { padding: spacing.lg, paddingBottom: spacing.xxxl },
   hero: { marginBottom: spacing.lg },
   imageWrap: { width: '100%', aspectRatio: 1, backgroundColor: colors.border, borderRadius: radius.xl, overflow: 'hidden', ...shadow.soft },
   image: { width: '100%', height: '100%' },
-  loadingOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  loadingOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' },
   loadingText: { marginTop: spacing.xs, color: colors.textMuted },
   errorCard: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, ...shadow.soft, marginBottom: spacing.lg },
   rowCenter: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
@@ -328,6 +357,6 @@ const getStyles = (colors) => StyleSheet.create({
   productEmoji: { fontSize: 28 },
   productName: { ...typography.bodyLarge, color: colors.textPrimary, fontWeight: '600' },
   productDesc: { ...typography.caption, color: colors.textSecondary },
-  bottomActions: { marginTop: spacing.xl },
+  bottomActions: { marginTop: spacing.xl, paddingBottom: spacing.xl },
   info: { color: colors.textSecondary },
 });

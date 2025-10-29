@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { AppButton, AppHeader } from '../components/common';
+import { AppButton } from '../components/common';
 import { spacing } from '../styles/theme';
 import { useTheme } from '../styles/ThemeProvider';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Header from './Header';
 
 export default function CameraCaptureScreen({ navigation }) {
   const { colors } = useTheme();
@@ -14,6 +16,10 @@ export default function CameraCaptureScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
+
+  const screenHeight = Dimensions.get('screen').height;
+  const headerHeight = screenHeight / 5;
+  const headerOffset = Math.ceil(headerHeight) + spacing.xl; // offset accru sous le header
 
   useEffect(() => {
     if (Platform.OS === 'web') return;
@@ -70,19 +76,25 @@ export default function CameraCaptureScreen({ navigation }) {
   if (Platform.OS === 'web') {
     return (
       <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }] }>
-        <AppHeader title="Analyse visage" onBack={() => navigation.goBack()} compact />
-        <Text style={{ color: colors.textPrimary, marginBottom: spacing.md, textAlign: 'center', paddingHorizontal: spacing.xl, fontSize: 15, lineHeight: 22 }}>
-          La caméra n'est pas disponible sur la version Web. Utilisez la galerie.
-        </Text>
-        <AppButton 
-          label={busy ? 'Chargement...' : 'Choisir une photo dans la galerie'} 
-          onPress={openGalleryFallback} 
-          disabled={busy}
-          icon={{ name: 'image', provider: 'Ionicons' }}
+        <Header
+          headerTitle="Analyse visage"
+          headerSubtitle="Choisissez une photo depuis la galerie."
+          navigation={navigation}
         />
-        <Text style={{ color: colors.textMuted, marginTop: spacing.lg, textAlign: 'center', paddingHorizontal: spacing.xl, fontSize: 13 }}>
-          💡 Astuce : Sélectionnez un selfie bien éclairé avec votre visage centré
-        </Text>
+        <View style={{ width: '100%', paddingHorizontal: spacing.lg, paddingTop: headerOffset }}>
+          <Text style={{ color: colors.textPrimary, marginBottom: spacing.md, textAlign: 'center', paddingHorizontal: spacing.xl, fontSize: 15, lineHeight: 22 }}>
+            La caméra n'est pas disponible sur la version Web. Utilisez la galerie.
+          </Text>
+          <AppButton 
+            label={busy ? 'Chargement...' : 'Choisir une photo dans la galerie'} 
+            onPress={openGalleryFallback} 
+            disabled={busy}
+            icon={{ name: 'image', provider: 'Ionicons' }}
+          />
+          <Text style={{ color: colors.textMuted, marginTop: spacing.lg, textAlign: 'center', paddingHorizontal: spacing.xl, fontSize: 13 }}>
+            💡 Astuce : Sélectionnez un selfie bien éclairé avec votre visage centré
+          </Text>
+        </View>
       </View>
     );
   }
@@ -91,16 +103,27 @@ export default function CameraCaptureScreen({ navigation }) {
   if (!permission.granted) {
     return (
       <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }] }>
-        <Text style={{ color: colors.textPrimary, marginBottom: spacing.md }}>Autorisez l'accès à la caméra</Text>
-        <AppButton label="Autoriser" onPress={requestPermission} />
+        <Header
+          headerTitle="Autoriser la caméra"
+          headerSubtitle="Nous en avons besoin pour analyser votre peau."
+          navigation={navigation}
+        />
+        <View style={{ paddingHorizontal: spacing.lg, paddingTop: headerOffset, width: '100%' }}>
+          <Text style={{ color: colors.textPrimary, marginBottom: spacing.md, textAlign: 'center' }}>Autorisez l'accès à la caméra</Text>
+          <AppButton label="Autoriser" onPress={requestPermission} />
+        </View>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <AppHeader title="Prendre une photo" onBack={() => navigation.goBack()} compact />
-      <View style={{ flex: 1 }}>
+      <Header
+        headerTitle="Prendre une photo"
+        headerSubtitle="Centrez votre visage pour des recommandations personnalisées"
+        navigation={navigation}
+      />
+      <View style={{ flex: 1, paddingTop: headerOffset }}>
         <CameraView ref={cameraRef} style={styles.camera} facing="front" onCameraReady={() => setReady(true)} />
         {/* Overlay de cadrage */}
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -110,7 +133,7 @@ export default function CameraCaptureScreen({ navigation }) {
           </View>
         </View>
       </View>
-      <View style={styles.footer}>
+      <SafeAreaView edges={["bottom"]} style={styles.footer}>
         <AppButton 
           label={busy ? 'Traitement...' : (ready ? 'Capturer' : 'Préparation…')} 
           onPress={capture} 
@@ -124,7 +147,7 @@ export default function CameraCaptureScreen({ navigation }) {
           style={{ marginTop: spacing.sm }}
           icon={{ name: 'image', provider: 'Ionicons' }}
         />
-      </View>
+      </SafeAreaView>
     </View>
   );
 }
@@ -132,7 +155,7 @@ export default function CameraCaptureScreen({ navigation }) {
 const getStyles = (c) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background },
   camera: { flex: 1 },
-  footer: { padding: spacing.lg },
+  footer: { padding: spacing.lg, paddingBottom: spacing.xl },
   overlayContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   faceGuide: {
     width: '60%',

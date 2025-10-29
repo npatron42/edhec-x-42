@@ -6,6 +6,8 @@ import Svg, { Path, G, Circle, Line } from "react-native-svg"
 import { spacing, radius } from "../../styles/theme"
 import { useTheme } from "../../styles/ThemeProvider"
 import AppIcon from "../common/AppIcon"
+import { useNavigation } from '@react-navigation/native'
+import ScanSkinCard from "./ScanSkinCard"
 
 const EcologyIcon = ({ color = "#000000", size = 32 }) => (
 	<Svg width={size} height={size} viewBox="0 0 56 56">
@@ -110,6 +112,7 @@ const EconomyIcon = ({ color = "#000000", size = 24 }) => (
 export default function DashboardGrid() {
 	const colors = useTheme()
 	const styles = getStyles(colors)
+	const navigation = useNavigation()
 
 	const cards = [
 		{
@@ -121,6 +124,7 @@ export default function DashboardGrid() {
 			},
 			badgeColor: colors.primarySoft,
 			iconColor: colors.primary,
+			onPress: () => navigation.navigate('CameraCapture'),
 		},
 		{
 			key: "recommendations",
@@ -187,13 +191,18 @@ export default function DashboardGrid() {
 					) => {
 						const CardComponent = onPress ? TouchableOpacity : View
 						const interactiveProps = onPress
-							? { activeOpacity: 0.85, onPress }
+							? { activeOpacity: 0.85, onPress, accessibilityRole: 'button', accessibilityLabel: title }
 							: {}
 
 						const isSpecialCard = index % 2 === 0
 						const cardStyle = isSpecialCard
 							? [styles.gridItem, styles.specialGridItem]
 							: styles.gridItem
+
+						// Use dedicated component for the Scan tile to match develop organization
+						if (key === 'scan') {
+							return <ScanSkinCard key={key} style={cardStyle} />
+						}
 
 						return (
 							<CardComponent
@@ -241,8 +250,8 @@ export default function DashboardGrid() {
 											<Text
 												style={[
 													styles.cardValue,
-													{ color: "white" },
-												]}
+												{ color: "white" },
+											]}
 											>
 												{value}
 												{valueSuffix
@@ -288,17 +297,17 @@ export default function DashboardGrid() {
 											<Text
 												style={[
 													styles.cardValue,
-													{
+												{
 														color:
 															valueColor ||
 															colors.textPrimary,
-													},
-												]}
+												},
+											]}
 											>
 												{value}
 												{valueSuffix
-													? ` ${valueSuffix}`
-													: ""}
+														? ` ${valueSuffix}`
+														: ""}
 											</Text>
 										) : null}
 									</>
